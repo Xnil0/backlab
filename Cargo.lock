@@ -7,5 +7,5 @@ name = "bakbon"
 version = "0.1.0"
 
 [[package]]
-name = "kortex"
+name = "qortex"
 version = "0.1.0"

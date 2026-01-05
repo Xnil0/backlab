@@ -2,5 +2,10 @@
 name = "bakbon"
 version = "0.1.0"
 edition = "2024"
+description = "Infrastructure Microkernel for composing gateways, services, load balancers, caching systems etc."
+license = "MIT"
+repository = "https://github.com/Xnil0/backlab.git"
+documentation = "https://docs.rs/bakbon"
+readme = "README.md"
 
 [dependencies]
