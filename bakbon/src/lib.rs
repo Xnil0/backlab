@@ -12,17 +12,16 @@ mod route;
 mod service;
 
 pub use {
-    balancer::LoadBalancer,
-    cache::Cache,
-    config::Config,
-    error::Error,
-    gateway::Gateway,
+    error::{
+        MyErr,
+        MyResult,
+    },
     message::{
-        Category,
+        ContentType,
+        Encoding,
         Message,
+        MessageKind,
+        Method,
         Scope,
     },
-    registry::Registry,
-    route::Route,
-    service::Service,
 };

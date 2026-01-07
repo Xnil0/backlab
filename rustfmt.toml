@@ -65,6 +65,7 @@ fn_params_layout = "Tall"
 # Options: "Mixed", "Horizontal", "Vertical"
 # Default: "Mixed"
 imports_layout = "Vertical"
+# imports_layout = "Horizontal"
 
 # Control how imports are grouped
 # Options: "Preserve", "Crate", "Module", "One"
