@@ -1,10 +1,4 @@
-use {
-    super::scheme::Scheme,
-    crate::error::{
-        MyErr,
-        MyResult,
-    },
-};
+use super::scheme::Scheme;
 
 pub struct Endpoint {
     scheme:    Scheme,
@@ -32,10 +26,9 @@ impl Endpoint {
 
     pub fn authority(&self) -> &str { &self.authority }
 
-    pub fn path(&self) -> MyResult<&str> {
-        match self.path {
-            Some(ref path) => Ok(path),
-            None => Err(MyErr::NoPath),
-        }
+    pub fn path(&self) -> Option<&str> {
+        self.path
+            .as_ref()
+            .map(|p| p.as_str())
     }
 }

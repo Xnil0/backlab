@@ -5,13 +5,14 @@ use {
     super::Builder,
     crate::message::{
         ContentType,
-        DeliveryMode,
         Encoding,
+        Fanout,
+        Guarantee,
+        Intent,
         MessageKind,
         Method,
+        OrderingKey,
         Priority,
-        Scope,
-        delivery::OrderingKey,
         identity::{
             CausationId,
             CorrelationId,
@@ -21,7 +22,6 @@ use {
             TenantId,
             TraceId,
         },
-        semantics::Intent,
     },
     std::time::{
         Duration,
@@ -42,7 +42,6 @@ pub struct Message<T> {
     // Semantics
     pub(super) kind:         MessageKind,
     pub(super) expect_reply: bool,
-    pub(super) scope:        Scope,
     pub(super) method:       Option<Method>,
     pub(super) intent:       Option<Intent>,
 
@@ -52,13 +51,14 @@ pub struct Message<T> {
     pub(super) body:         T,
 
     // Delivery
-    pub(super) delivery_mode: DeliveryMode,
-    pub(super) priority:      Priority,
-    pub(super) deadline:      Option<SystemTime>,
-    pub(super) delay:         Option<Duration>,
-    pub(super) retries:       u32,
-    pub(super) ttl:           Option<Duration>,
-    pub(super) ordering_key:  Option<OrderingKey>,
+    pub(super) guarantee:    Guarantee,
+    pub(super) fanout:       Fanout,
+    pub(super) priority:     Priority,
+    pub(super) deadline:     Option<SystemTime>,
+    pub(super) delay:        Option<Duration>,
+    pub(super) retries:      u32,
+    pub(super) ttl:          Option<Duration>,
+    pub(super) ordering_key: Option<OrderingKey>,
 
     // Security
     pub(super) subject:       Option<String>,
@@ -70,47 +70,45 @@ pub struct Message<T> {
 }
 
 impl<T> Message<T> {
-    pub fn builder(id: impl Into<String>, kind: MessageKind, body: T) -> Builder<T> {
-        Builder::new(id, kind, body)
-    }
+    pub fn builder(kind: MessageKind, body: T) -> Builder<T> { Builder::new(kind, body) }
 
-    pub fn id(&self) -> &str { self.id.value() }
+    pub fn id(&self) -> &str { self.id.as_ref() }
 
     pub fn correlation_id(&self) -> Option<&str> {
         self.correlation_id
             .as_ref()
-            .map(|id| id.value())
+            .map(|id| id.as_ref())
     }
 
     pub fn causation_id(&self) -> Option<&str> {
         self.causation_id
             .as_ref()
-            .map(|id| id.value())
+            .map(|id| id.as_ref())
     }
 
     pub fn trace_id(&self) -> Option<&str> {
         self.trace_id
             .as_ref()
-            .map(|id| id.value())
+            .map(|id| id.as_ref())
     }
 
     pub fn span_id(&self) -> Option<&str> {
         self.span_id
             .as_ref()
-            .map(|id| id.value())
+            .map(|id| id.as_ref())
     }
 
     pub fn tenant_id(&self) -> Option<&str> {
         self.tenant_id
             .as_ref()
-            .map(|id| id.value())
+            .map(|id| id.as_ref())
     }
 
     pub fn kind(&self) -> &MessageKind { &self.kind }
 
     pub fn expect_reply(&self) -> bool { self.expect_reply }
 
-    pub fn scope(&self) -> &Scope { &self.scope }
+    pub fn fanout(&self) -> &Fanout { &self.fanout }
 
     pub fn method(&self) -> Option<&Method> { self.method.as_ref() }
 
@@ -126,7 +124,7 @@ impl<T> Message<T> {
 
     pub fn body(&self) -> &T { &self.body }
 
-    pub fn delivery_mode(&self) -> &DeliveryMode { &self.delivery_mode }
+    pub fn guarantee(&self) -> &Guarantee { &self.guarantee }
 
     pub fn priority(&self) -> &Priority { &self.priority }
 

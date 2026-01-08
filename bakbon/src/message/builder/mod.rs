@@ -5,13 +5,12 @@ pub use message::Message;
 use {
     super::{
         ContentType,
-        DeliveryMode,
         Encoding,
+        Fanout,
+        Guarantee,
         MessageKind,
         Method,
         Priority,
-        Scope,
-        delivery::OrderingKey,
         identity::{
             CausationId,
             CorrelationId,
@@ -21,7 +20,10 @@ use {
             TenantId,
             TraceId,
         },
-        semantics::Intent,
+    },
+    crate::message::{
+        Intent,
+        OrderingKey,
     },
     std::time::{
         Duration,
@@ -31,7 +33,7 @@ use {
 
 pub struct Builder<T> {
     // Identity
-    id:             MessageId,
+    id:             Option<MessageId>,
     correlation_id: Option<CorrelationId>,
     causation_id:   Option<CausationId>,
     trace_id:       Option<TraceId>,
@@ -41,7 +43,6 @@ pub struct Builder<T> {
     // Semantics
     kind:         MessageKind,
     expect_reply: bool,
-    scope:        Scope,
     method:       Option<Method>,
     intent:       Option<Intent>,
 
@@ -51,13 +52,14 @@ pub struct Builder<T> {
     body:         T,
 
     // Delivery
-    delivery_mode: DeliveryMode,
-    priority:      Priority,
-    deadline:      Option<SystemTime>,
-    delay:         Option<Duration>,
-    retries:       u32,
-    ttl:           Option<Duration>,
-    ordering_key:  Option<OrderingKey>,
+    guarantee:    Guarantee,
+    fanout:       Fanout,
+    priority:     Priority,
+    deadline:     Option<SystemTime>,
+    delay:        Option<Duration>,
+    retries:      u32,
+    ttl:          Option<Duration>,
+    ordering_key: Option<OrderingKey>,
 
     // Security
     subject:       Option<String>,
@@ -69,9 +71,9 @@ pub struct Builder<T> {
 }
 
 impl<T> Builder<T> {
-    pub fn new(id: impl Into<String>, kind: MessageKind, body: T) -> Self {
+    pub fn new(kind: MessageKind, body: T) -> Self {
         Self {
-            id: MessageId::new(id.into()),
+            id: None,
             correlation_id: None,
             causation_id: None,
             trace_id: None,
@@ -79,13 +81,13 @@ impl<T> Builder<T> {
             tenant_id: None,
             kind,
             expect_reply: false,
-            scope: Scope::default(),
+            fanout: Fanout::default(),
             method: None,
             intent: None,
             content_type: ContentType::default(),
             encoding: Encoding::default(),
             body,
-            delivery_mode: DeliveryMode::default(),
+            guarantee: Guarantee::default(),
             priority: Priority::default(),
             deadline: None,
             delay: None,

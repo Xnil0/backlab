@@ -21,16 +21,15 @@ impl From<String> for MessageKind {
     }
 }
 
-impl From<MessageKind> for String {
-    fn from(value: MessageKind) -> Self {
-        match value {
+impl AsRef<str> for MessageKind {
+    fn as_ref(&self) -> &str {
+        match self {
             MessageKind::Command => "command",
             MessageKind::Query => "query",
             MessageKind::Reply => "reply",
             MessageKind::Event => "event",
             MessageKind::Telemetry => "telemetry",
-            MessageKind::Custom(ref kind) => kind,
+            MessageKind::Custom(kind) => kind.as_str(),
         }
-        .to_string()
     }
 }

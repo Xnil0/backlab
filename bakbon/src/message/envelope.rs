@@ -1,11 +1,9 @@
-pub mod endpoint;
-pub mod header;
-pub mod scheme;
-
-use {
-    super::Message,
-    endpoint::Endpoint,
-    header::Header,
+use crate::{
+    Message,
+    message::{
+        endpoint::Endpoint,
+        header::Header,
+    },
 };
 
 pub struct Envelope<T> {

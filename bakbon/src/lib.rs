@@ -7,6 +7,7 @@ mod config;
 mod error;
 mod gateway;
 mod message;
+mod middleware;
 mod registry;
 mod route;
 mod service;
@@ -19,9 +20,11 @@ pub use {
     message::{
         ContentType,
         Encoding,
+        Fanout,
+        Guarantee,
         Message,
         MessageKind,
         Method,
-        Scope,
+        Priority,
     },
 };

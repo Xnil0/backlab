@@ -5,21 +5,14 @@ use {
     },
     crate::message::{
         ContentType,
-        DeliveryMode,
         Encoding,
+        Fanout,
+        Guarantee,
+        Intent,
         Method,
+        OrderingKey,
         Priority,
-        Scope,
-        delivery::OrderingKey,
-        identity::{
-            CausationId,
-            CorrelationId,
-            IntegrityTag,
-            SpanId,
-            TenantId,
-            TraceId,
-        },
-        semantics::Intent,
+        identity::IntegrityTag,
     },
     std::time::{
         Duration,
@@ -28,28 +21,51 @@ use {
 };
 
 impl<T> Builder<T> {
-    pub fn correlation(mut self, id: impl Into<String>) -> Self {
-        self.correlation_id = Some(CorrelationId::new(id.into()));
+    pub fn id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.id = Some(id_str.into());
+        }
         self
     }
 
-    pub fn causation(mut self, id: impl Into<String>) -> Self {
-        self.causation_id = Some(CausationId::new(id.into()));
+    pub fn correlation_id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.correlation_id = Some(id_str.into());
+        }
         self
     }
 
-    pub fn trace(mut self, id: impl Into<String>) -> Self {
-        self.trace_id = Some(TraceId::new(id.into()));
+    pub fn causation_id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.causation_id = Some(id_str.into());
+        }
         self
     }
 
-    pub fn span(mut self, id: impl Into<String>) -> Self {
-        self.span_id = Some(SpanId::new(id.into()));
+    pub fn trace_id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.trace_id = Some(id_str.into());
+        }
         self
     }
 
-    pub fn tenant(mut self, id: impl Into<String>) -> Self {
-        self.tenant_id = Some(TenantId::new(id.into()));
+    pub fn span_id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.span_id = Some(id_str.into());
+        }
+        self
+    }
+
+    pub fn tenant_id(mut self, id: impl Into<String>) -> Self {
+        let id_str = id.into();
+        if !id_str.is_empty() {
+            self.tenant_id = Some(id_str.into());
+        }
         self
     }
 
@@ -58,8 +74,8 @@ impl<T> Builder<T> {
         self
     }
 
-    pub fn scope(mut self, scope: Scope) -> Self {
-        self.scope = scope;
+    pub fn fanout(mut self, fanout: Fanout) -> Self {
+        self.fanout = fanout;
         self
     }
 
@@ -83,8 +99,8 @@ impl<T> Builder<T> {
         self
     }
 
-    pub fn delivery_mode(mut self, mode: DeliveryMode) -> Self {
-        self.delivery_mode = mode;
+    pub fn guarantee(mut self, mode: Guarantee) -> Self {
+        self.guarantee = mode;
         self
     }
 
@@ -141,7 +157,7 @@ impl<T> Builder<T> {
 
     pub fn build(self) -> Message<T> {
         Message {
-            id:             self.id,
+            id:             self.id.unwrap_or_default(),
             correlation_id: self.correlation_id,
             causation_id:   self.causation_id,
             trace_id:       self.trace_id,
@@ -150,7 +166,7 @@ impl<T> Builder<T> {
 
             kind:         self.kind,
             expect_reply: self.expect_reply,
-            scope:        self.scope,
+            fanout:       self.fanout,
             method:       self.method,
             intent:       self.intent,
 
@@ -158,13 +174,13 @@ impl<T> Builder<T> {
             encoding:     self.encoding,
             body:         self.body,
 
-            delivery_mode: self.delivery_mode,
-            priority:      self.priority,
-            deadline:      self.deadline,
-            delay:         self.delay,
-            retries:       self.retries,
-            ttl:           self.ttl,
-            ordering_key:  self.ordering_key,
+            guarantee:    self.guarantee,
+            priority:     self.priority,
+            deadline:     self.deadline,
+            delay:        self.delay,
+            retries:      self.retries,
+            ttl:          self.ttl,
+            ordering_key: self.ordering_key,
 
             subject:       self.subject,
             roles:         self.roles,
