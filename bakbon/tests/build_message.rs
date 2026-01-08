@@ -1,53 +1,43 @@
-use bakbon::{
-    ContentType,
-    Encoding,
-    Fanout,
-    Guarantee,
-    Message,
-    MessageKind,
-    Priority,
-};
+use bakbon::Message;
 
 #[test]
-fn build_message() {
-    let kind = MessageKind::Command;
-    let body = "random_body_content";
+fn build_default_message() {
+    let msg = Message::default();
 
-    let msg = Message::builder(kind, body).build();
+    assert!(msg.payload().is_empty());
+    assert!(!msg.has_meta());
+}
 
-    assert!(!msg.id().is_empty());
-    assert!(msg.correlation_id().is_none());
-    assert!(msg.causation_id().is_none());
-    assert!(msg.trace_id().is_none());
-    assert!(msg.span_id().is_none());
+#[test]
+fn build_message_with_payload() {
+    let payload: Vec<u8> = "random_payload".into();
+    let msg = Message::new(payload);
 
-    assert_eq!(msg.kind(), &MessageKind::Command);
-    assert_eq!(msg.kind().as_ref(), "command");
-    assert!(!msg.expect_reply());
-    assert!(msg.method().is_none());
-    assert!(msg.intent().is_none());
+    assert!(!msg.payload().is_empty());
+    assert_eq!(msg.payload(), &Vec::from("random_payload"));
+}
 
-    assert_eq!(msg.content_type(), &ContentType::default());
-    assert_eq!(msg.encoding(), &Encoding::default());
-    assert_eq!(msg.body(), &body);
+#[test]
+fn build_message_with_empty_payload() {
+    let payload: Vec<u8> = vec![];
+    let msg = Message::new(payload);
 
-    assert_eq!(msg.guarantee(), &Guarantee::default());
-    assert_eq!(msg.fanout(), &Fanout::default());
-    assert_eq!(msg.priority(), &Priority::default());
-    assert!(msg.deadline().is_none());
-    assert!(msg.delay().is_none());
-    assert_eq!(msg.retries(), 0);
-    assert!(msg.time_to_live().is_none());
-    assert!(msg.ordering_key().is_none());
+    assert!(msg.payload().is_empty());
+}
 
-    assert!(msg.subject().is_none());
-    assert!(msg.roles().is_empty());
-    assert!(msg.permissions().is_empty());
-    assert!(msg.integrity_tag().is_none());
+#[test]
+fn build_message_with_metadata() {
+    let payload = String::from("random_payload");
 
-    assert!(
-        msg.timestamp()
-            .elapsed()
-            .is_ok()
-    );
+    let msg = Message::new(payload)
+        .with_header("content-type", "text/plain")
+        .with_header("encoding", "utf-8");
+
+    let content_type = msg.meta("content-type");
+    assert!(content_type.is_some());
+    assert_eq!(content_type.unwrap(), "text/plain");
+
+    let encoding = msg.meta("encoding");
+    assert!(encoding.is_some());
+    assert_eq!(encoding.unwrap(), "utf-8");
 }

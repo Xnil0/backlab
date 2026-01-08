@@ -1,38 +1,23 @@
-use crate::{
-    Message,
-    message::{
-        endpoint::Endpoint,
-        header::Header,
-    },
-};
+use std::collections::HashMap;
 
-pub struct Envelope<T> {
-    source:      Endpoint,
-    destination: Endpoint,
-    headers:     Vec<Header>,
-    message:     Message<T>,
+type Headers = HashMap<String, String>;
+
+#[derive(Default)]
+pub(super) struct Envelope {
+    headers: Headers,
 }
 
-impl<T> Envelope<T> {
-    pub fn new(source: Endpoint, destination: Endpoint, message: Message<T>) -> Self {
-        Self {
-            source,
-            destination,
-            headers: vec![],
-            message,
-        }
+impl Envelope {
+    pub(super) fn add_header(&mut self, key: &str, value: &str) {
+        self.headers
+            .insert(key.into(), value.into());
     }
 
-    pub fn add_header(mut self, header: Header) -> Self {
-        self.headers.push(header);
-        self
+    pub(super) fn is_empty(&self) -> bool { self.headers.is_empty() }
+
+    pub(super) fn get_header(&self, key: &str) -> Option<&str> {
+        self.headers
+            .get(key)
+            .map(|v| v.as_str())
     }
-
-    pub fn source(&self) -> &Endpoint { &self.source }
-
-    pub fn destination(&self) -> &Endpoint { &self.destination }
-
-    pub fn headers(&self) -> &Vec<Header> { &self.headers }
-
-    pub fn message(&self) -> &Message<T> { &self.message }
 }

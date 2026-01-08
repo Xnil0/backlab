@@ -10,3 +10,6 @@ If you use this project in your application, service, or research, please includ
 
 ## Overview
 
+## Message
+
+The message structure is the core building block of the system.
