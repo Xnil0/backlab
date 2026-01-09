@@ -3,28 +3,29 @@
 //! load balancers, caching systems, etc. into custom distributed systems.
 mod balancer;
 mod cache;
+mod channel;
 mod config;
+mod envelope;
 mod error;
 mod gateway;
-mod message;
 mod middleware;
 mod registry;
 mod route;
 mod service;
 
 pub use {
+    channel::{
+        Channel,
+        Endpoint,
+        Receiver,
+        Sender,
+    },
+    envelope::{
+        Envelope,
+        Message,
+    },
     error::{
         MyErr,
         MyResult,
-    },
-    message::{
-        // ContentType,
-        // Encoding,
-        // Fanout,
-        // Guarantee,
-        Message,
-        // MessageKind,
-        // Method,
-        // Priority,
     },
 };

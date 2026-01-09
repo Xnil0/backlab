@@ -2,19 +2,17 @@ use bakbon::Message;
 
 #[test]
 fn build_default_message() {
-    let msg = Message::default();
-
+    let msg: Message<Vec<u8>> = Message::default();
     assert!(msg.payload().is_empty());
-    assert!(!msg.has_meta());
 }
 
 #[test]
 fn build_message_with_payload() {
-    let payload: Vec<u8> = "random_payload".into();
+    let payload = "random_payload";
     let msg = Message::new(payload);
 
     assert!(!msg.payload().is_empty());
-    assert_eq!(msg.payload(), &Vec::from("random_payload"));
+    assert_eq!(msg.payload(), &payload);
 }
 
 #[test]
@@ -30,14 +28,14 @@ fn build_message_with_metadata() {
     let payload = String::from("random_payload");
 
     let msg = Message::new(payload)
-        .with_header("content-type", "text/plain")
-        .with_header("encoding", "utf-8");
+        .add_header("content-type", "text/plain")
+        .add_header("encoding", "utf-8");
 
-    let content_type = msg.meta("content-type");
+    let content_type = msg.get_header("content-type");
     assert!(content_type.is_some());
     assert_eq!(content_type.unwrap(), "text/plain");
 
-    let encoding = msg.meta("encoding");
+    let encoding = msg.get_header("encoding");
     assert!(encoding.is_some());
     assert_eq!(encoding.unwrap(), "utf-8");
 }
