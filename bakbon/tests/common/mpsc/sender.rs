@@ -13,6 +13,14 @@ pub struct MpscSender<P> {
     inner:   mpsc::Sender<Envelope<P>>,
 }
 
+impl<P> Sender<P> for MpscSender<P> {
+    fn send(&self, message: Envelope<P>) -> MyResult<()> {
+        self.inner
+            .send(message)
+            .map_err(|_| MyErr::SendFailed)
+    }
+}
+
 impl<P> MpscSender<P> {
     pub fn new(address: &str, inner: mpsc::Sender<Envelope<P>>) -> Self {
         Self {
@@ -22,12 +30,4 @@ impl<P> MpscSender<P> {
     }
 
     pub fn address(&self) -> &str { &self.address }
-}
-
-impl<P> Sender<P> for MpscSender<P> {
-    fn send(&self, message: Envelope<P>) -> MyResult<()> {
-        self.inner
-            .send(message)
-            .map_err(|_| MyErr::SendFailed)
-    }
 }

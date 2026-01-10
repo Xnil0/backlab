@@ -14,29 +14,24 @@ pub trait Receiver<P> {
     fn receive(&self) -> MyResult<Envelope<P>>;
 }
 
-pub trait Endpoint<P>: Sender<P> + Receiver<P> {
-    fn ping(&self, message: Envelope<P>) -> MyResult<Envelope<P>> {
-        self.send(message)?;
-        self.receive()
-    }
-}
+pub trait Endpoint<P>: Sender<P> + Receiver<P> {}
 
-pub struct Channel<S, R, P>
+pub struct Channel<'a, S, R, P>
 where
     S: Sender<P>,
     R: Receiver<P>,
 {
-    sender:   S,
-    receiver: R,
+    sender:   &'a S,
+    receiver: &'a R,
     _phantom: PhantomData<P>,
 }
 
-impl<S, R, P> Channel<S, R, P>
+impl<'a, S, R, P> Channel<'a, S, R, P>
 where
     S: Sender<P>,
     R: Receiver<P>,
 {
-    pub fn new(sender: S, receiver: R) -> Self {
+    pub fn new(sender: &'a S, receiver: &'a R) -> Self {
         Self {
             sender,
             receiver,

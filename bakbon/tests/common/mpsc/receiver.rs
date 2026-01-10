@@ -13,6 +13,14 @@ pub struct MpscReceiver<P> {
     inner:   mpsc::Receiver<Envelope<P>>,
 }
 
+impl<P> Receiver<P> for MpscReceiver<P> {
+    fn receive(&self) -> MyResult<Envelope<P>> {
+        self.inner
+            .recv()
+            .map_err(|_| MyErr::ReceptionFailed)
+    }
+}
+
 impl<P> MpscReceiver<P> {
     pub fn new(address: &str, inner: mpsc::Receiver<Envelope<P>>) -> Self {
         Self {
@@ -22,12 +30,4 @@ impl<P> MpscReceiver<P> {
     }
 
     pub fn address(&self) -> &str { &self.address }
-}
-
-impl<P> Receiver<P> for MpscReceiver<P> {
-    fn receive(&self) -> MyResult<Envelope<P>> {
-        self.inner
-            .recv()
-            .map_err(|_| MyErr::ReceptionFailed)
-    }
 }

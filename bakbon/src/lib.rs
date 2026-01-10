@@ -9,6 +9,7 @@ mod envelope;
 mod error;
 mod gateway;
 mod middleware;
+mod queue;
 mod registry;
 mod route;
 mod service;
