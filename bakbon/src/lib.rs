@@ -5,28 +5,34 @@ mod balancer;
 mod cache;
 mod channel;
 mod config;
-mod envelope;
 mod error;
 mod gateway;
+mod message;
 mod middleware;
 mod queue;
 mod registry;
-mod route;
+mod router;
 mod service;
 
 pub use {
     channel::{
         Channel,
-        Endpoint,
         Receiver,
         Sender,
-    },
-    envelope::{
-        Envelope,
-        Message,
     },
     error::{
         MyErr,
         MyResult,
+    },
+    message::{
+        Endpoint,
+        Envelope,
+        Headers,
+        Reply,
+    },
+    service::{
+        ProcMap,
+        Processor,
+        Service,
     },
 };

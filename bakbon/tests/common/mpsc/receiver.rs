@@ -8,21 +8,21 @@ use {
     std::sync::mpsc,
 };
 
-pub struct MpscReceiver<P> {
+pub struct MpscReceiver {
     address: String,
-    inner:   mpsc::Receiver<Envelope<P>>,
+    inner:   mpsc::Receiver<Envelope>,
 }
 
-impl<P> Receiver<P> for MpscReceiver<P> {
-    fn receive(&self) -> MyResult<Envelope<P>> {
+impl Receiver for MpscReceiver {
+    fn receive(&self) -> MyResult<Envelope> {
         self.inner
             .recv()
             .map_err(|_| MyErr::ReceptionFailed)
     }
 }
 
-impl<P> MpscReceiver<P> {
-    pub fn new(address: &str, inner: mpsc::Receiver<Envelope<P>>) -> Self {
+impl MpscReceiver {
+    pub fn new(address: &str, inner: mpsc::Receiver<Envelope>) -> Self {
         Self {
             address: address.to_string(),
             inner,

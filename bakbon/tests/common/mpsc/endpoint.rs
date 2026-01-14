@@ -1,6 +1,5 @@
 use {
     bakbon::{
-        Endpoint,
         Envelope,
         MyErr,
         MyResult,
@@ -10,35 +9,33 @@ use {
     std::sync::mpsc,
 };
 
-pub struct MpscEndpoint<P> {
+pub struct MpscEndpoint {
     address:  String,
-    sender:   mpsc::Sender<Envelope<P>>,
-    receiver: mpsc::Receiver<Envelope<P>>,
+    sender:   mpsc::Sender<Envelope>,
+    receiver: mpsc::Receiver<Envelope>,
 }
 
-impl<P> Endpoint<P> for MpscEndpoint<P> {}
-
-impl<P> Sender<P> for MpscEndpoint<P> {
-    fn send(&self, message: Envelope<P>) -> MyResult<()> {
+impl Sender for MpscEndpoint {
+    fn send(&self, message: Envelope) -> MyResult<()> {
         self.sender
             .send(message)
             .map_err(|_| MyErr::SendFailed)
     }
 }
 
-impl<P> Receiver<P> for MpscEndpoint<P> {
-    fn receive(&self) -> MyResult<Envelope<P>> {
+impl Receiver for MpscEndpoint {
+    fn receive(&self) -> MyResult<Envelope> {
         self.receiver
             .recv()
             .map_err(|_| MyErr::ReceptionFailed)
     }
 }
 
-impl<P> MpscEndpoint<P> {
+impl MpscEndpoint {
     pub fn new(
         address: &str,
-        sender: mpsc::Sender<Envelope<P>>,
-        receiver: mpsc::Receiver<Envelope<P>>,
+        sender: mpsc::Sender<Envelope>,
+        receiver: mpsc::Receiver<Envelope>,
     ) -> Self {
         Self {
             address: address.to_string(),

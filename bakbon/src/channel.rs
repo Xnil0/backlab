@@ -1,49 +1,37 @@
-use {
-    crate::{
-        MyResult,
-        envelope::Envelope,
-    },
-    std::marker::PhantomData,
+use crate::{
+    MyResult,
+    message::Envelope,
 };
 
-pub trait Sender<P> {
-    fn send(&self, message: Envelope<P>) -> MyResult<()>;
+pub trait Sender {
+    fn send(&self, message: Envelope) -> MyResult<()>;
 }
 
-pub trait Receiver<P> {
-    fn receive(&self) -> MyResult<Envelope<P>>;
+pub trait Receiver {
+    fn receive(&self) -> MyResult<Envelope>;
 }
 
-pub trait Endpoint<P>: Sender<P> + Receiver<P> {}
-
-pub struct Channel<'a, S, R, P>
+pub struct Channel<'a, S, R>
 where
-    S: Sender<P>,
-    R: Receiver<P>,
+    S: Sender,
+    R: Receiver,
 {
-    sender:   &'a S,
-    receiver: &'a R,
-    _phantom: PhantomData<P>,
+    from: &'a S,
+    to:   &'a R,
 }
 
-impl<'a, S, R, P> Channel<'a, S, R, P>
+impl<'a, S, R> Channel<'a, S, R>
 where
-    S: Sender<P>,
-    R: Receiver<P>,
+    S: Sender,
+    R: Receiver,
 {
-    pub fn new(sender: &'a S, receiver: &'a R) -> Self {
-        Self {
-            sender,
-            receiver,
-            _phantom: PhantomData,
-        }
-    }
+    pub fn new(from: &'a S, to: &'a R) -> Self { Self { from, to } }
 
-    pub fn enqueue(&self, message: Envelope<P>) -> MyResult<()> { self.sender.send(message) }
+    pub fn enqueue(&self, message: Envelope) -> MyResult<()> { self.from.send(message) }
 
-    pub fn dequeue(&self) -> MyResult<Envelope<P>> { self.receiver.receive() }
+    pub fn dequeue(&self) -> MyResult<Envelope> { self.to.receive() }
 
-    pub fn sender(&self) -> &S { &self.sender }
+    pub fn from(&self) -> &S { &self.from }
 
-    pub fn receiver(&self) -> &R { &self.receiver }
+    pub fn to(&self) -> &R { &self.to }
 }
