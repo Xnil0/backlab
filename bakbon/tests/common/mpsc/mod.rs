@@ -1,9 +1,9 @@
-mod endpoint;
+mod address;
 mod receiver;
 mod sender;
 
 pub use {
-    endpoint::MpscEndpoint,
+    address::MpscAddress,
     receiver::MpscReceiver,
     sender::MpscSender,
 };

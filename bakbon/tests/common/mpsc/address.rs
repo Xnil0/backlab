@@ -9,13 +9,13 @@ use {
     std::sync::mpsc,
 };
 
-pub struct MpscEndpoint {
+pub struct MpscAddress {
     address:  String,
     sender:   mpsc::Sender<Envelope>,
     receiver: mpsc::Receiver<Envelope>,
 }
 
-impl Sender for MpscEndpoint {
+impl Sender for MpscAddress {
     fn send(&self, message: Envelope) -> MyResult<()> {
         self.sender
             .send(message)
@@ -23,7 +23,7 @@ impl Sender for MpscEndpoint {
     }
 }
 
-impl Receiver for MpscEndpoint {
+impl Receiver for MpscAddress {
     fn receive(&self) -> MyResult<Envelope> {
         self.receiver
             .recv()
@@ -31,7 +31,7 @@ impl Receiver for MpscEndpoint {
     }
 }
 
-impl MpscEndpoint {
+impl MpscAddress {
     pub fn new(
         address: &str,
         sender: mpsc::Sender<Envelope>,

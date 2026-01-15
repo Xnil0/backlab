@@ -1,8 +1,8 @@
 mod mpsc;
-mod service;
+mod services;
 
 pub use mpsc::{
-    MpscEndpoint,
+    MpscAddress,
     MpscReceiver,
     MpscSender,
 };
