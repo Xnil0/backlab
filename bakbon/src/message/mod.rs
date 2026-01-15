@@ -1,4 +1,4 @@
-mod endpoint;
+mod address;
 mod envelope;
 mod route;
 
@@ -7,7 +7,7 @@ use {
     std::collections::HashMap,
 };
 pub use {
-    endpoint::Endpoint,
+    address::Address,
     envelope::Envelope,
 };
 

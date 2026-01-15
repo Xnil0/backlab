@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum Scheme {
+pub enum Protocol {
     Tcp,
     Udp,
     Http,
@@ -13,23 +13,7 @@ pub enum Scheme {
     Custom(String),
 }
 
-impl From<&str> for Scheme {
-    fn from(value: &str) -> Self {
-        match value {
-            "tcp" => Scheme::Tcp,
-            "udp" => Scheme::Udp,
-            "http" => Scheme::Http,
-            "https" => Scheme::Https,
-            "grpc" => Scheme::Grpc,
-            "mqtt" => Scheme::Mqtt,
-            "serial" => Scheme::Serial,
-            "inproc" => Scheme::InProc,
-            _ => Scheme::Custom(value.to_string()),
-        }
-    }
-}
-
-impl fmt::Display for Scheme {
+impl fmt::Display for Protocol {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Tcp => write!(f, "tcp"),
@@ -41,6 +25,22 @@ impl fmt::Display for Scheme {
             Self::Serial => write!(f, "serial"),
             Self::InProc => write!(f, "inproc"),
             Self::Custom(s) => write!(f, "{}", s),
+        }
+    }
+}
+
+impl From<&str> for Protocol {
+    fn from(value: &str) -> Self {
+        match value {
+            "tcp" => Self::Tcp,
+            "udp" => Self::Udp,
+            "http" => Self::Http,
+            "https" => Self::Https,
+            "grpc" => Self::Grpc,
+            "mqtt" => Self::Mqtt,
+            "serial" => Self::Serial,
+            "inproc" => Self::InProc,
+            _ => Self::Custom(value.to_string()),
         }
     }
 }

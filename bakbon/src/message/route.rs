@@ -1,24 +1,24 @@
 use {
-    super::endpoint::Endpoint,
+    super::address::Address,
     crate::MyResult,
 };
 
 pub struct Route {
-    source:      Endpoint,
-    destination: Endpoint,
+    source:      Address,
+    destination: Address,
 }
 
 impl Route {
     pub(super) fn new(source: impl Into<String>, destination: impl Into<String>) -> MyResult<Self> {
         Ok(Self {
-            source:      Endpoint::new(source.into())?,
-            destination: Endpoint::new(destination.into())?,
+            source:      Address::new(source.into())?,
+            destination: Address::new(destination.into())?,
         })
     }
 
-    pub fn source(&self) -> &Endpoint { &self.source }
+    pub fn source(&self) -> &Address { &self.source }
 
-    pub fn destination(&self) -> &Endpoint { &self.destination }
+    pub fn destination(&self) -> &Address { &self.destination }
 }
 
 //
@@ -28,7 +28,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new_route_from_str() {
+    fn new_route() {
         let source = "https://source.com/";
         let destination = "https://destination.com/";
 

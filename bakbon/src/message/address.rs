@@ -1,25 +1,23 @@
-mod scheme;
-
 use {
+    super::MyResult,
     crate::{
         MyErr,
-        MyResult,
+        protocol::Protocol,
     },
-    scheme::Scheme,
 };
 
-pub struct Endpoint {
-    scheme:    Scheme,
+pub struct Address {
+    scheme:    Protocol,
     authority: String,
     path:      String,
     query:     Option<String>,
     fragment:  Option<String>,
 }
 
-impl Endpoint {
+impl Address {
     pub fn new(uri: impl ToString) -> MyResult<Self> { Self::try_from(uri.to_string()) }
 
-    pub fn scheme(&self) -> &Scheme { &self.scheme }
+    pub fn scheme(&self) -> &Protocol { &self.scheme }
 
     pub fn authority(&self) -> &str { &self.authority }
 
@@ -30,13 +28,13 @@ impl Endpoint {
     pub fn fragment(&self) -> &Option<String> { &self.fragment }
 }
 
-impl TryFrom<String> for Endpoint {
+impl TryFrom<String> for Address {
     type Error = MyErr;
 
     fn try_from(value: String) -> MyResult<Self> {
         let (scheme, remains) = match value.split_once("://") {
-            Some(splitted) => (Scheme::from(splitted.0), splitted.1),
-            None => return Err(MyErr::InvalidEndpoint),
+            Some(splitted) => (Protocol::from(splitted.0), splitted.1),
+            None => return Err(MyErr::InvalidAddress),
         };
 
         let (authority, path) = match remains.split_once("/") {
@@ -67,7 +65,7 @@ impl TryFrom<String> for Endpoint {
     }
 }
 
-impl ToString for Endpoint {
+impl ToString for Address {
     fn to_string(&self) -> String {
         let query = self
             .query
@@ -93,17 +91,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new_endpoint_from_str() {
-        let url = "https://endpoint-url.com";
-        let endpoint = Endpoint::new(url);
-        assert!(endpoint.is_ok());
+    fn new_address() {
+        let url = "https://address-url.com";
+        let address = Address::new(url);
+        assert!(address.is_ok());
 
-        let endpoint = endpoint.unwrap();
-        assert_eq!(endpoint.scheme, Scheme::Https);
-        assert_eq!(endpoint.authority, "endpoint-url.com");
-        assert_eq!(endpoint.path, "");
-        assert_eq!(endpoint.query, None);
-        assert_eq!(endpoint.fragment, None);
-        assert_eq!(endpoint.to_string(), url);
+        let address = address.unwrap();
+        assert_eq!(address.scheme, Protocol::Https);
+        assert_eq!(address.authority, "address-url.com");
+        assert_eq!(address.path, "");
+        assert_eq!(address.query, None);
+        assert_eq!(address.fragment, None);
+        assert_eq!(address.to_string(), url);
     }
 }

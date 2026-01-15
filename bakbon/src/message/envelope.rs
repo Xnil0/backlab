@@ -4,7 +4,7 @@ use {
         MyResult,
         route::Route,
     },
-    crate::Endpoint,
+    crate::Address,
     bytes::Bytes,
 };
 
@@ -27,10 +27,15 @@ impl Envelope {
         })
     }
 
-    pub fn add_header(mut self, key: &str, value: &str) -> Self {
+    pub fn header(mut self, key: &str, value: &str) -> Self {
         self.headers
             .insert(key.to_string(), value.to_string());
         self
+    }
+
+    pub fn add_header(&mut self, k: &str, v: &str) {
+        self.headers
+            .insert(k.to_string(), v.to_string());
     }
 
     pub fn get_header(&self, key: &str) -> Option<&str> {
@@ -41,9 +46,20 @@ impl Envelope {
 
     pub fn payload(&self) -> &Bytes { &self.payload }
 
-    pub fn source(&self) -> &Endpoint { &self.route.source() }
+    pub fn source(&self) -> &Address { &self.route.source() }
 
-    pub fn destination(&self) -> &Endpoint { &self.route.destination() }
+    pub fn destination(&self) -> &Address { &self.route.destination() }
+
+    pub fn reply(mut self, payload: Bytes) -> Self {
+        self.route = Route::new(
+            self.destination().to_string(),
+            self.source().to_string(),
+        )
+        .unwrap();
+
+        self.payload = payload;
+        self
+    }
 }
 
 //
@@ -53,7 +69,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn build_message_with_payload() {
+    fn new_message_with_payload() {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload = Bytes::from("random_payload");
@@ -66,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn build_message_with_empty_payload() {
+    fn new_message_with_empty_payload() {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload: Bytes = Bytes::new();
@@ -78,14 +94,14 @@ mod tests {
     }
 
     #[test]
-    fn build_message_with_metadata() -> MyResult<()> {
+    fn new_message_with_headers() -> MyResult<()> {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload = Bytes::from("random_payload");
 
         let msg = Envelope::new(source, destination, payload)?
-            .add_header("content-type", "text/plain")
-            .add_header("encoding", "utf-8");
+            .header("content-type", "text/plain")
+            .header("encoding", "utf-8");
 
         let content_type = msg.get_header("content-type");
         assert!(content_type.is_some());

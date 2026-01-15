@@ -1,6 +1,6 @@
 use {
     super::{
-        Endpoint,
+        Address,
         Envelope,
         MyResult,
         Reply,
@@ -9,12 +9,12 @@ use {
 };
 
 pub trait Processor {
-    fn process(&self, message: Envelope) -> MyResult<Reply>;
+    fn execute(&self, message: Envelope) -> MyResult<Reply>;
 }
 
 pub type ProcMap = HashMap<String, Box<dyn Processor>>;
 
 pub trait Service {
-    fn endpoint(&self) -> &Endpoint;
-    fn dispatch(&self, message: Envelope) -> MyResult<Reply>;
+    fn address(&self) -> &Address;
+    fn process(&self, message: Envelope) -> MyResult<Reply>;
 }

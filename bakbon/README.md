@@ -1,6 +1,6 @@
 # Bakbon
 
-Bakbon is a infrastructure microkernel created to help configure and compose different infrastructure components/services such as gateways, load balancers, caching systems...
+Bakbon is an infrastructure microkernel created to help configure and compose different infrastructure components/services such as gateways, load balancers, caching systems...
 
 ## Attribution
 
