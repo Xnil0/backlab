@@ -5,3 +5,5 @@ pub use {
     registry::Registry,
     router::Router,
 };
+
+use crate::Service;

@@ -3,7 +3,6 @@
 //! load balancers, caching systems, etc. into custom distributed systems.
 mod balancer;
 mod cache;
-mod config;
 mod error;
 mod gateway;
 mod message;
@@ -18,6 +17,7 @@ pub use {
         MyErr,
         MyResult,
     },
+    gateway::Gateway,
     message::{
         Address,
         Envelope,

@@ -1,15 +1,14 @@
 use {
-    crate::Service,
+    super::Service,
     std::collections::HashMap,
 };
 
 type ServiceMap = HashMap<String, Box<dyn Service>>;
 
-pub(super) struct Builder(ServiceMap);
+#[derive(Default)]
+pub struct RegistryBuilder(ServiceMap);
 
-impl Builder {
-    pub(super) fn new() -> Self { Self(ServiceMap::new()) }
-
+impl RegistryBuilder {
     pub fn register(&mut self, service: impl Service + 'static) {
         let name = service
             .address()
@@ -23,10 +22,11 @@ impl Builder {
     pub fn build(self) -> Registry { Registry(self.0) }
 }
 
-pub struct Registry(ServiceMap);
+#[derive(Default)]
+pub struct Registry(pub(super) ServiceMap);
 
 impl Registry {
-    pub fn builder() -> Builder { Builder::new() }
+    pub fn builder() -> RegistryBuilder { RegistryBuilder::default() }
 
     pub fn get(&self, address: &str) -> Option<&dyn Service> {
         self.0
