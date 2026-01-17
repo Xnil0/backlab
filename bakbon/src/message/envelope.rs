@@ -1,7 +1,7 @@
 use {
     super::{
         Headers,
-        Route,
+        route::Route,
     },
     bytes::Bytes,
 };
@@ -13,10 +13,10 @@ pub struct Envelope {
 }
 
 impl Envelope {
-    pub fn new(source: impl ToString, destination: impl ToString, payload: Bytes) -> Self {
+    pub fn new(src: impl ToString, dst: impl ToString, payload: Bytes) -> Self {
         Self {
             headers: Headers::default(),
-            route: Route::new(source, destination),
+            route: Route::new(src, dst),
             payload,
         }
     }
@@ -64,10 +64,10 @@ mod tests {
 
     #[test]
     fn new_message_with_payload() {
-        let source = "https://source.com";
-        let destination = "https://destination.com";
+        let src = "https://source.com";
+        let dst = "https://destination.com";
         let payload = Bytes::from("random_payload");
-        let msg = Envelope::new(source, destination, payload.clone());
+        let msg = Envelope::new(src, dst, payload.clone());
 
         assert!(!msg.payload().is_empty());
         assert_eq!(msg.payload(), &payload);
@@ -75,21 +75,21 @@ mod tests {
 
     #[test]
     fn new_message_with_empty_payload() {
-        let source = "https://source.com";
-        let destination = "https://destination.com";
+        let src = "https://source.com";
+        let dst = "https://destination.com";
         let payload: Bytes = Bytes::new();
-        let msg = Envelope::new(source, destination, payload);
+        let msg = Envelope::new(src, dst, payload);
 
         assert!(msg.payload().is_empty());
     }
 
     #[test]
     fn new_message_with_headers() {
-        let source = "https://source.com";
-        let destination = "https://destination.com";
+        let src = "https://source.com";
+        let dst = "https://destination.com";
         let payload = Bytes::from("random_payload");
 
-        let msg = Envelope::new(source, destination, payload)
+        let msg = Envelope::new(src, dst, payload)
             .header("content-type", "text/plain")
             .header("encoding", "utf-8");
 
@@ -100,5 +100,31 @@ mod tests {
         let encoding = msg.get_header("encoding");
         assert!(encoding.is_some());
         assert_eq!(encoding.unwrap(), "utf-8");
+    }
+
+    #[test]
+    fn envelope_reply() {
+        let src = "https://source.com";
+        let dst = "https://destination.com";
+        let payload = Bytes::from("How old are you?");
+
+        let msg = Envelope::new(src, dst, payload)
+            .header("content-type", "text/plain")
+            .header("encoding", "utf-8");
+
+        let new_payload = Bytes::from("{age: 31}");
+        let reply = msg
+            .reply(new_payload.clone())
+            .header("content-type", "application/json");
+
+        let content_type = reply.get_header("content-type");
+        assert!(content_type.is_some());
+        assert_eq!(content_type.unwrap(), "application/json");
+
+        let encoding = reply.get_header("encoding");
+        assert!(encoding.is_some());
+        assert_eq!(encoding.unwrap(), "utf-8");
+
+        assert_eq!(reply.payload(), &new_payload);
     }
 }
