@@ -7,7 +7,7 @@ pub type MyResult<T> = Result<T, MyErr>;
 
 #[derive(Debug)]
 pub enum MyErr {
-    EmptyMessageId,
+    InvalidMessage,
     InvalidAddress,
     WrongStrategy,
     QueueFull,
@@ -23,7 +23,7 @@ impl<T> From<PoisonError<T>> for MyErr {
 impl fmt::Display for MyErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::EmptyMessageId => f.write_str("Empty message ID."),
+            Self::InvalidMessage => f.write_str("Invalid message."),
             Self::InvalidAddress => f.write_str("Invalid address."),
             Self::WrongStrategy => f.write_str("Wrong balancing strategy."),
             Self::QueueFull => f.write_str("Queue is full."),
@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn error_display() {
-        let empty_msg_id = MyErr::EmptyMessageId;
+        let empty_msg_id = MyErr::InvalidMessage;
         let invalid_addr = MyErr::InvalidAddress;
         let wrong_strategy = MyErr::WrongStrategy;
         let queue_full = MyErr::QueueFull;
@@ -61,7 +61,7 @@ mod tests {
         let service_not_found = MyErr::ServiceNotFound;
         let processor_not_found = MyErr::ProcessorNotFound;
 
-        assert_eq!(empty_msg_id.to_string(), "Empty message ID.");
+        assert_eq!(empty_msg_id.to_string(), "Invalid message.");
         assert_eq!(invalid_addr.to_string(), "Invalid address.");
         assert_eq!(
             wrong_strategy.to_string(),
