@@ -1,4 +1,4 @@
-pub(super) enum Ordering {
+pub(in crate::queue) enum Ordering {
     Fifo,
     Priority,
     Unordered,

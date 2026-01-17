@@ -1,4 +1,4 @@
-pub(super) enum Durability {
+pub(in crate::queue) enum Durability {
     Memory,
     Disk,
     Replicated,

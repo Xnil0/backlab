@@ -1,10 +1,8 @@
 use {
     super::{
         Headers,
-        MyResult,
-        route::Route,
+        Route,
     },
-    crate::Address,
     bytes::Bytes,
 };
 
@@ -15,16 +13,12 @@ pub struct Envelope {
 }
 
 impl Envelope {
-    pub fn new(
-        source: impl Into<String>,
-        destination: impl Into<String>,
-        payload: Bytes,
-    ) -> MyResult<Self> {
-        Ok(Self {
+    pub fn new(source: impl ToString, destination: impl ToString, payload: Bytes) -> Self {
+        Self {
             headers: Headers::default(),
-            route: Route::new(source, destination)?,
+            route: Route::new(source, destination),
             payload,
-        })
+        }
     }
 
     pub fn header(mut self, key: &str, value: &str) -> Self {
@@ -46,23 +40,23 @@ impl Envelope {
 
     pub fn payload(&self) -> &Bytes { &self.payload }
 
-    pub fn source(&self) -> &Address { &self.route.source() }
+    pub fn source(&self) -> &str { &self.route.source() }
 
-    pub fn destination(&self) -> &Address { &self.route.destination() }
+    pub fn destination(&self) -> &str { &self.route.destination() }
 
     pub fn reply(mut self, payload: Bytes) -> Self {
         self.route = Route::new(
             self.destination().to_string(),
             self.source().to_string(),
-        )
-        .unwrap();
-
+        );
         self.payload = payload;
         self
     }
 }
 
-//
+//  +------------+
+//  | UNIT TESTS |
+//  +------------+
 
 #[cfg(test)]
 mod tests {
@@ -73,10 +67,8 @@ mod tests {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload = Bytes::from("random_payload");
-        let msg_res = Envelope::new(source, destination, payload.clone());
-        assert!(msg_res.is_ok());
+        let msg = Envelope::new(source, destination, payload.clone());
 
-        let msg = msg_res.unwrap();
         assert!(!msg.payload().is_empty());
         assert_eq!(msg.payload(), &payload);
     }
@@ -86,20 +78,18 @@ mod tests {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload: Bytes = Bytes::new();
-        let msg_res = Envelope::new(source, destination, payload);
-        assert!(msg_res.is_ok());
+        let msg = Envelope::new(source, destination, payload);
 
-        let msg = msg_res.unwrap();
         assert!(msg.payload().is_empty());
     }
 
     #[test]
-    fn new_message_with_headers() -> MyResult<()> {
+    fn new_message_with_headers() {
         let source = "https://source.com";
         let destination = "https://destination.com";
         let payload = Bytes::from("random_payload");
 
-        let msg = Envelope::new(source, destination, payload)?
+        let msg = Envelope::new(source, destination, payload)
             .header("content-type", "text/plain")
             .header("encoding", "utf-8");
 
@@ -110,7 +100,5 @@ mod tests {
         let encoding = msg.get_header("encoding");
         assert!(encoding.is_some());
         assert_eq!(encoding.unwrap(), "utf-8");
-
-        Ok(())
     }
 }

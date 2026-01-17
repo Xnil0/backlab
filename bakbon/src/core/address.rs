@@ -2,7 +2,7 @@ use {
     super::MyResult,
     crate::{
         MyErr,
-        protocol::Protocol,
+        core::Protocol,
     },
 };
 
@@ -15,7 +15,7 @@ pub struct Address {
 }
 
 impl Address {
-    pub fn new(uri: impl ToString) -> MyResult<Self> { Self::try_from(uri.to_string()) }
+    pub fn new(uri: &str) -> MyResult<Self> { uri.try_into() }
 
     pub fn scheme(&self) -> &Protocol { &self.scheme }
 
@@ -28,11 +28,11 @@ impl Address {
     pub fn fragment(&self) -> &Option<String> { &self.fragment }
 }
 
-impl TryFrom<String> for Address {
+impl TryInto<Address> for &str {
     type Error = MyErr;
 
-    fn try_from(value: String) -> MyResult<Self> {
-        let (scheme, remains) = match value.split_once("://") {
+    fn try_into(self) -> MyResult<Address> {
+        let (scheme, remains) = match self.split_once("://") {
             Some(splitted) => (Protocol::from(splitted.0), splitted.1),
             None => return Err(MyErr::InvalidAddress),
         };
@@ -55,7 +55,7 @@ impl TryFrom<String> for Address {
             None => None,
         };
 
-        Ok(Self {
+        Ok(Address {
             scheme,
             authority,
             path,
@@ -85,6 +85,10 @@ impl ToString for Address {
         )
     }
 }
+
+//  +------------+
+//  | UNIT TESTS |
+//  +------------+
 
 #[cfg(test)]
 mod tests {

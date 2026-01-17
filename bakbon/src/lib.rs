@@ -1,25 +1,24 @@
 //! Bakbon is a infrastructure microkernel created to help configure and
 //! compose different infrastructure components/services such as gateways,
 //! load balancers, caching systems, etc. into custom distributed systems.
-mod balancer;
-mod cache;
-mod error;
-mod gateway;
+mod core;
+mod infra;
 mod message;
-mod middleware;
-mod protocol;
 mod queue;
 mod routing;
 mod service;
 
 pub use {
-    error::{
+    core::{
         MyErr,
         MyResult,
     },
-    gateway::Gateway,
+    infra::{
+        Cache,
+        Gateway,
+        Middleware,
+    },
     message::{
-        Address,
         Envelope,
         Headers,
         Reply,

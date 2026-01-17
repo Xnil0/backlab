@@ -1,5 +1,4 @@
-#[allow(unused)]
-pub(super) enum QueueProvider {
+pub(in crate::queue) enum QueueProvider {
     Memory,
     Kafka,
     RabbitMq,

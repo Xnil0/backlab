@@ -13,6 +13,10 @@ pub enum Protocol {
     Custom(String),
 }
 
+impl Default for Protocol {
+    fn default() -> Self { Self::InProc }
+}
+
 impl fmt::Display for Protocol {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

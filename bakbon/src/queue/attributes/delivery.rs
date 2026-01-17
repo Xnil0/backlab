@@ -1,4 +1,4 @@
-pub(super) enum DeliveryGuarantee {
+pub(in crate::queue) enum DeliveryGuarantee {
     AtLeastOnce,
     AtMostOnce,
     ExactlyOnce,

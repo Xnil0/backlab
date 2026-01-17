@@ -1,8 +1,5 @@
+mod attributes;
 mod builder;
-mod delivery;
-mod durability;
-mod ordering;
-mod provider;
 
 use {
     crate::{
@@ -10,11 +7,13 @@ use {
         MyErr,
         MyResult,
     },
+    attributes::{
+        DeliveryGuarantee,
+        Durability,
+        Ordering,
+        QueueProvider,
+    },
     builder::QueueBuilder,
-    delivery::DeliveryGuarantee,
-    durability::Durability,
-    ordering::Ordering,
-    provider::QueueProvider,
     std::{
         collections::VecDeque,
         sync::Mutex,
@@ -22,7 +21,6 @@ use {
     },
 };
 
-#[allow(unused)]
 #[derive(Default)]
 pub struct Queue {
     provider:           QueueProvider,

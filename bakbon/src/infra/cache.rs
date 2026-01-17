@@ -12,4 +12,8 @@ pub struct Cache {
 
 impl Cache {
     pub fn get(&self, k: &str) -> Option<&Envelope> { self.store.get(k) }
+
+    pub fn set(&mut self, k: String, v: Envelope) { self.store.insert(k, v); }
+
+    pub fn clear(&mut self) { self.store.clear(); }
 }

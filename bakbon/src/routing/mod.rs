@@ -1,5 +1,6 @@
 mod registry;
 mod router;
+mod balancer;
 
 pub use {
     registry::Registry,

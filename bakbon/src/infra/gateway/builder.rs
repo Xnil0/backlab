@@ -1,30 +1,34 @@
-#![allow(unused)]
-
-use {
-    crate::{
+use crate::{
+    Gateway,
+    MyResult,
+    core::{
         Address,
-        Envelope,
-        MyResult,
-        protocol::Protocol,
+        Protocol,
     },
-    bytes::Bytes,
 };
 
 pub struct GatewayBuilder {
     address:          Address,
     port:             u16,
+    protocol:         Protocol,
     max_payload_size: Option<usize>,
     compression:      bool,
 }
 
 impl GatewayBuilder {
-    fn new(address: impl Into<String>, port: u16) -> MyResult<Self> {
+    pub(super) fn new(address: &str, port: u16) -> MyResult<Self> {
         Ok(Self {
-            address: address.into().try_into()?,
+            address: address.try_into()?,
             port,
+            protocol: Protocol::default(),
             max_payload_size: None,
             compression: false,
         })
+    }
+
+    pub fn protocol(mut self, protocol: &str) -> Self {
+        self.protocol = Protocol::from(protocol);
+        self
     }
 
     pub fn max_payload_size(mut self, size: usize) -> Self {
@@ -41,23 +45,9 @@ impl GatewayBuilder {
         Gateway {
             address:          self.address,
             port:             self.port,
+            protocol:         self.protocol,
             max_payload_size: self.max_payload_size,
             compression:      self.compression,
         }
     }
-}
-
-pub struct Gateway {
-    address:          Address,
-    port:             u16,
-    max_payload_size: Option<usize>,
-    compression:      bool,
-}
-
-impl Gateway {
-    pub fn builder(address: impl Into<String>, port: u16) -> MyResult<GatewayBuilder> {
-        GatewayBuilder::new(address, port)
-    }
-
-    // pub fn handle(&self, data: Bytes) -> MyResult<Envelope> {}
 }

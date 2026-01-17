@@ -1,22 +1,26 @@
 use {
     super::Service,
+    crate::{
+        MyErr,
+        MyResult,
+    },
     std::collections::HashMap,
 };
 
-type ServiceMap = HashMap<String, Box<dyn Service>>;
+type Services = Vec<Box<dyn Service>>;
+type ServiceMap = HashMap<String, Services>;
 
 #[derive(Default)]
 pub struct RegistryBuilder(ServiceMap);
 
 impl RegistryBuilder {
-    pub fn register(&mut self, service: impl Service + 'static) {
-        let name = service
-            .address()
-            .authority()
-            .to_string();
+    pub fn register(mut self, service: impl Service + 'static) -> Self {
+        let name = service.address().to_string();
 
         self.0
-            .insert(name, Box::new(service));
+            .insert(name, vec![Box::new(service)]);
+
+        self
     }
 
     pub fn build(self) -> Registry { Registry(self.0) }
@@ -28,7 +32,22 @@ pub struct Registry(pub(super) ServiceMap);
 impl Registry {
     pub fn builder() -> RegistryBuilder { RegistryBuilder::default() }
 
-    pub fn get(&self, address: &str) -> Option<&dyn Service> {
+    pub fn add_instance(&mut self, address: &str) -> MyResult<()> {
+        let instances = self
+            .0
+            .get_mut(address)
+            .ok_or(MyErr::ServiceNotFound)?;
+
+        let new_instance = instances
+            .last()
+            .unwrap()
+            .duplicate();
+
+        instances.push(new_instance);
+        Ok(())
+    }
+
+    pub fn get(&self, address: &str) -> Option<&Vec<Box<dyn Service>>> {
         self.0
             .get(address)
             .map(|s| s.as_ref())
@@ -47,12 +66,8 @@ impl From<Vec<Box<dyn Service>>> for Registry {
         let service_map = services
             .into_iter()
             .map(|service| {
-                let address = service
-                    .address()
-                    .authority()
-                    .to_string();
-
-                (address, service)
+                let address = service.address().to_string();
+                (address, vec![service])
             })
             .collect::<ServiceMap>();
 
@@ -60,13 +75,50 @@ impl From<Vec<Box<dyn Service>>> for Registry {
     }
 }
 
+//  +------------+
+//  | UNIT TESTS |
+//  +------------+
+
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use {
+        super::*,
+        crate::{
+            Envelope,
+            Reply,
+        },
+    };
+
+    #[derive(Clone)]
+    struct NoService;
+
+    impl Service for NoService {
+        fn address(&self) -> &str { "http://no_service.com" }
+
+        fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
+
+        fn process(&self, _message: Envelope) -> MyResult<Reply> { Ok(None) }
+    }
 
     #[test]
-    fn build_empty_registry() {
-        let registry = Registry::builder().build();
-        assert!(registry.list().is_empty())
+    fn build_registry() -> MyResult<()> {
+        let address = "http://no_service.com";
+        let instance1 = NoService;
+
+        let mut registry = Registry::builder()
+            .register(instance1)
+            .build();
+
+        let list = registry.list();
+        assert!(!list.is_empty());
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0], address);
+
+        registry.add_instance(address)?;
+        let instances = registry.get(address);
+        assert!(instances.is_some());
+        assert_eq!(instances.unwrap().len(), 2);
+
+        Ok(())
     }
 }
