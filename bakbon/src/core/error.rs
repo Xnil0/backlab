@@ -9,8 +9,7 @@ pub type MyResult<T> = Result<T, MyErr>;
 pub enum MyErr {
     EmptyMessageId,
     InvalidAddress,
-    SendFailed,
-    ReceptionFailed,
+    WrongStrategy,
     QueueFull,
     LockFailed(String),
     ServiceNotFound,
@@ -26,8 +25,7 @@ impl fmt::Display for MyErr {
         match self {
             Self::EmptyMessageId => f.write_str("Empty message ID."),
             Self::InvalidAddress => f.write_str("Invalid address."),
-            Self::SendFailed => f.write_str("Failed to send message."),
-            Self::ReceptionFailed => f.write_str("Failed to receive message."),
+            Self::WrongStrategy => f.write_str("Wrong balancing strategy."),
             Self::QueueFull => f.write_str("Queue is full."),
             Self::LockFailed(e) => write!(f, "Failed to acquire enqueue lock: {}", e),
             Self::ServiceNotFound => f.write_str("Service not found."),
@@ -57,11 +55,31 @@ mod tests {
     fn error_display() {
         let empty_msg_id = MyErr::EmptyMessageId;
         let invalid_addr = MyErr::InvalidAddress;
+        let wrong_strategy = MyErr::WrongStrategy;
         let queue_full = MyErr::QueueFull;
+        let lock_failed = MyErr::LockFailed("test".to_string());
+        let service_not_found = MyErr::ServiceNotFound;
+        let processor_not_found = MyErr::ProcessorNotFound;
 
         assert_eq!(empty_msg_id.to_string(), "Empty message ID.");
         assert_eq!(invalid_addr.to_string(), "Invalid address.");
+        assert_eq!(
+            wrong_strategy.to_string(),
+            "Wrong balancing strategy."
+        );
         assert_eq!(queue_full.to_string(), "Queue is full.");
+        assert_eq!(
+            lock_failed.to_string(),
+            "Failed to acquire enqueue lock: test"
+        );
+        assert_eq!(
+            service_not_found.to_string(),
+            "Service not found."
+        );
+        assert_eq!(
+            processor_not_found.to_string(),
+            "Processor not found."
+        );
     }
 
     #[test]

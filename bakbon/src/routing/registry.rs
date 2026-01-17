@@ -89,11 +89,13 @@ mod tests {
         },
     };
 
+    const ADDRESS: &str = "http://no-service.com";
+
     #[derive(Clone)]
     struct NoService;
 
     impl Service for NoService {
-        fn address(&self) -> &str { "http://no_service.com" }
+        fn address(&self) -> &str { ADDRESS }
 
         fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
 
@@ -101,21 +103,45 @@ mod tests {
     }
 
     #[test]
-    fn build_registry() -> MyResult<()> {
-        let address = "http://no_service.com";
-        let instance1 = NoService;
+    fn default_registry() {
+        let registry = Registry::default();
+        assert!(registry.list().is_empty());
+    }
 
-        let mut registry = Registry::builder()
-            .register(instance1)
+    #[test]
+    fn build_registry() {
+        let instance = NoService;
+        let registry = Registry::builder()
+            .register(instance)
             .build();
 
         let list = registry.list();
         assert!(!list.is_empty());
         assert_eq!(list.len(), 1);
-        assert_eq!(list[0], address);
+        assert_eq!(list[0], ADDRESS);
+    }
 
-        registry.add_instance(address)?;
-        let instances = registry.get(address);
+    #[test]
+    fn get_instances_from_registry() {
+        let instance = NoService;
+        let registry = Registry::builder()
+            .register(instance)
+            .build();
+
+        let instances = registry.get(ADDRESS);
+        assert!(instances.is_some());
+        assert_eq!(instances.unwrap().len(), 1);
+    }
+
+    #[test]
+    fn new_service_instance() -> MyResult<()> {
+        let instance = NoService;
+        let mut registry = Registry::builder()
+            .register(instance)
+            .build();
+
+        registry.add_instance(ADDRESS)?;
+        let instances = registry.get(ADDRESS);
         assert!(instances.is_some());
         assert_eq!(instances.unwrap().len(), 2);
 
