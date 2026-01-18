@@ -6,7 +6,7 @@ use {
     },
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Address {
     scheme:    Protocol,
     authority: String,

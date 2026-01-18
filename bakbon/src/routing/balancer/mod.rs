@@ -9,7 +9,7 @@ use {
 pub(super) struct Balancer(Strategy);
 
 impl Balancer {
-    pub fn new(strategy: &str) -> Self { Self(strategy.into()) }
+    pub(super) fn new(strategy: &str) -> Self { Self(strategy.into()) }
 
     pub fn strategy(&self) -> &str { self.0.as_ref() }
 
@@ -47,6 +47,7 @@ mod tests {
     use {
         super::*,
         crate::{
+            Address,
             Envelope,
             MyResult,
             Reply,
@@ -54,10 +55,10 @@ mod tests {
     };
 
     #[derive(Debug, Clone)]
-    struct NoService(String);
+    struct NoService(Address);
 
     impl Service for NoService {
-        fn address(&self) -> &str { self.0.as_str() }
+        fn address(&self) -> &Address { &self.0 }
 
         fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
 
@@ -81,28 +82,35 @@ mod tests {
     }
 
     #[test]
-    fn balancer_select() {
-        let srv1 = NoService("http://no-service-1.com".to_string());
-        let srv2 = NoService("http://no-service-2.com".to_string());
-        let srv3 = NoService("http://no-service-3.com".to_string());
-        let instances: Vec<Box<dyn Service>> = vec![
-            Box::new(srv1.clone()),
-            Box::new(srv2.clone()),
-            Box::new(srv3.clone()),
-        ];
+    fn balancer_select() -> MyResult<()> {
+        let src1 = "http://no-service-1.com";
+        let src2 = "http://no-service-2.com";
+        let src3 = "http://no-service-3.com";
+
+        let addr1 = Address::new(src1)?;
+        let addr2 = Address::new(src2)?;
+        let addr3 = Address::new(src3)?;
+
+        let srv1 = NoService(addr1);
+        let srv2 = NoService(addr2);
+        let srv3 = NoService(addr3);
+
+        let instances: Vec<Box<dyn Service>> = vec![Box::new(srv1), Box::new(srv2), Box::new(srv3)];
 
         let mut balancer = Balancer::default();
 
         let selected = balancer.select(&instances);
-        assert_eq!(selected.address(), srv1.0);
+        assert_eq!(selected.address().to_string(), src1);
 
         let selected = balancer.select(&instances);
-        assert_eq!(selected.address(), srv2.0);
+        assert_eq!(selected.address().to_string(), src2);
 
         let selected = balancer.select(&instances);
-        assert_eq!(selected.address(), srv3.0);
+        assert_eq!(selected.address().to_string(), src3);
 
         let selected = balancer.select(&instances);
-        assert_eq!(selected.address(), srv1.0);
+        assert_eq!(selected.address().to_string(), src1);
+
+        Ok(())
     }
 }

@@ -8,12 +8,11 @@ use {
         MyErr,
         MyResult,
         Reply,
-        core::Address,
     },
 };
 
 #[derive(Default)]
-struct RouterBuilder {
+pub struct RouterBuilder {
     registry: Registry,
     balancer: Balancer,
 }
@@ -45,22 +44,22 @@ pub struct Router {
 impl Router {
     pub fn builder() -> RouterBuilder { RouterBuilder::default() }
 
-    pub fn route(&mut self, message: Envelope) -> MyResult<Reply> {
-        let address: Address = message
-            .destination()
-            .try_into()?;
-
+    pub fn route(&mut self, msg: Envelope) -> MyResult<Reply> {
         let instances = self
             .registry
-            .get(address.authority())
+            .get(msg.destination())
             .ok_or(MyErr::ServiceNotFound)?;
 
         let service = self
             .balancer
             .select(instances);
 
-        service.process(message)
+        service.process(msg)
     }
+
+    pub fn registry(&self) -> &Registry { &self.registry }
+
+    pub fn balancing_strategy(&self) -> &str { self.balancer.strategy() }
 }
 
 //  +------------+

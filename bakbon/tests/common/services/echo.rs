@@ -12,36 +12,42 @@ use bakbon::{
 pub struct EchoProc;
 
 impl Processor for EchoProc {
-    fn execute(&self, message: Envelope) -> MyResult<Reply> {
-        let payload = message.payload().clone();
-        let reply = message.reply(payload);
+    fn execute(&self, msg: Envelope) -> MyResult<Reply> {
+        let src = Address::new(msg.destination()).unwrap();
+        let dst = msg.source().to_string();
+        let payload = msg.payload().clone();
+
+        let mut reply = Envelope::new(src, dst, payload);
+        reply.copy_headers(msg);
+
         Ok(Some(reply))
     }
 }
 
 pub struct EchoService {
-    address:   Address,
+    address:    Address,
     processors: ProcMap,
 }
 
 impl EchoService {
-    pub fn new(address: impl ToString) -> MyResult<Self> {
-        let address = Address::try_from(address.to_string())?;
+    pub fn new(address: Address) -> Self {
         let mut processors = ProcMap::new();
-        processors.insert(String::from(""), Box::new(EchoProc));
+        processors.insert(String::from("/echo"), Box::new(EchoProc));
 
-        Ok(Self {
+        Self {
             address,
             processors,
-        })
+        }
     }
 }
 
 impl Service for EchoService {
     fn address(&self) -> &Address { &self.address }
 
+    fn duplicate(&self) -> Box<dyn Service> { Box::new(Self::new(self.address.clone())) }
+
     fn process(&self, message: Envelope) -> MyResult<Reply> {
-        let path = self.address().path();
+        let path = self.address.path();
         match self.processors.get(path) {
             Some(processor) => processor.execute(message),
             None => Err(MyErr::ProcessorNotFound),

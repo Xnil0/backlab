@@ -1,6 +1,9 @@
-use std::{
-    fmt,
-    sync::PoisonError,
+use {
+    crate::Envelope,
+    std::{
+        fmt,
+        sync::PoisonError,
+    },
 };
 
 pub type MyResult<T> = Result<T, MyErr>;
@@ -10,7 +13,7 @@ pub enum MyErr {
     InvalidMessage,
     InvalidAddress,
     WrongStrategy,
-    QueueFull,
+    QueueFull(Envelope),
     LockFailed(String),
     ServiceNotFound,
     ProcessorNotFound,
@@ -26,7 +29,7 @@ impl fmt::Display for MyErr {
             Self::InvalidMessage => f.write_str("Invalid message."),
             Self::InvalidAddress => f.write_str("Invalid address."),
             Self::WrongStrategy => f.write_str("Wrong balancing strategy."),
-            Self::QueueFull => f.write_str("Queue is full."),
+            Self::QueueFull(msg) => write!(f, "Queue is full: {:?}", msg),
             Self::LockFailed(e) => write!(f, "Failed to acquire enqueue lock: {}", e),
             Self::ServiceNotFound => f.write_str("Service not found."),
             Self::ProcessorNotFound => f.write_str("Processor not found."),
@@ -42,6 +45,8 @@ impl fmt::Display for MyErr {
 mod tests {
     use {
         super::*,
+        crate::Address,
+        bytes::Bytes,
         std::{
             sync::{
                 Arc,
@@ -56,7 +61,6 @@ mod tests {
         let empty_msg_id = MyErr::InvalidMessage;
         let invalid_addr = MyErr::InvalidAddress;
         let wrong_strategy = MyErr::WrongStrategy;
-        let queue_full = MyErr::QueueFull;
         let lock_failed = MyErr::LockFailed("test".to_string());
         let service_not_found = MyErr::ServiceNotFound;
         let processor_not_found = MyErr::ProcessorNotFound;
@@ -67,7 +71,6 @@ mod tests {
             wrong_strategy.to_string(),
             "Wrong balancing strategy."
         );
-        assert_eq!(queue_full.to_string(), "Queue is full.");
         assert_eq!(
             lock_failed.to_string(),
             "Failed to acquire enqueue lock: test"
@@ -100,5 +103,24 @@ mod tests {
             .into();
 
         assert!(matches!(err, MyErr::LockFailed(_)))
+    }
+
+    #[test]
+    fn queue_full_error() -> MyResult<()> {
+        let src = Address::new("http://source.com")?;
+        let dst = "http://destination.com";
+        let payload = Bytes::default();
+
+        let msg = Envelope::new(src.clone(), dst, payload.clone());
+        let queue_full = MyErr::QueueFull(msg);
+        assert!(matches!(queue_full, MyErr::QueueFull(_)));
+        assert_eq!(
+            queue_full.to_string(),
+            format!(
+                "Queue is full: {:?}",
+                Envelope::new(src, dst, payload)
+            )
+        );
+        Ok(())
     }
 }

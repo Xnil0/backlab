@@ -17,6 +17,7 @@ pub(super) enum Strategy {
     Random,
 }
 
+#[allow(unused)]
 impl Strategy {
     pub fn new(value: &str) -> Self { value.into() }
 

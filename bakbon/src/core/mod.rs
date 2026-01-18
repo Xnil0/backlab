@@ -2,11 +2,11 @@ mod address;
 mod error;
 mod protocol;
 
-pub use error::{
-    MyErr,
-    MyResult,
-};
-pub(super) use {
+pub use {
     address::Address,
+    error::{
+        MyErr,
+        MyResult,
+    },
     protocol::Protocol,
 };

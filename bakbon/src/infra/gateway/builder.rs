@@ -78,9 +78,9 @@ mod tests {
     fn build_default_gateway() -> MyResult<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         let gateway = builder.build();
-        assert_eq!(gateway.address(), ADDRESS);
+        assert_eq!(gateway.address().to_string(), ADDRESS);
         assert_eq!(gateway.port(), PORT);
-        assert_eq!(gateway.protocol(), "inproc");
+        assert_eq!(gateway.protocol(), &Protocol::InProc);
         assert_eq!(gateway.max_payload_size, None);
         assert_eq!(gateway.compression, false);
         Ok(())
@@ -93,7 +93,12 @@ mod tests {
         let gateway = builder
             .protocol(protocol)
             .build();
-        assert_eq!(gateway.protocol(), "http");
+        assert_eq!(
+            gateway.protocol(),
+            &Protocol::Http {
+                secure: false,
+            }
+        );
         Ok(())
     }
 

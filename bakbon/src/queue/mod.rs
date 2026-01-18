@@ -40,7 +40,7 @@ impl Queue {
 
         if let Some(capacity) = self.capacity {
             if buffer.len() >= capacity {
-                return Err(MyErr::QueueFull);
+                return Err(MyErr::QueueFull(msg));
             };
         }
         if self.ttl.is_some() {
@@ -81,6 +81,11 @@ impl Queue {
         self.delivery_guarantee
             .as_ref()
     }
+
+    pub fn len(&self) -> usize {
+        let buffer = self.buffer.lock().unwrap();
+        buffer.len()
+    }
 }
 
 //  +------------+
@@ -91,8 +96,11 @@ impl Queue {
 mod tests {
     use {
         super::*,
+        crate::Address,
         bytes::Bytes,
     };
+
+    const DST: &str = "tcp://queue.com";
 
     #[test]
     fn default_queue() {
@@ -127,28 +135,31 @@ mod tests {
     }
 
     #[test]
-    fn capacity_exceeded() {
+    fn capacity_exceeded() -> MyResult<()> {
+        let addr1 = Address::new("tcp://first.com")?;
+        let addr2 = Address::new("tcp://second.com")?;
+        let addr3 = Address::new("tcp://third.com")?;
+        let payload = Bytes::from("Hello, Queue!");
+
+        let msg1 = Envelope::new(addr1, DST, payload.clone());
+        let msg2 = Envelope::new(addr2, DST, payload.clone());
+        let msg3 = Envelope::new(addr3, DST, payload.clone());
+
         let queue = Queue::builder()
             .capacity(2)
             .build();
 
-        let payload = Bytes::from("Hello, Queue!");
-        let msg1 = Envelope::new("first", "queue", payload.clone());
-        let msg2 = Envelope::new("second", "queue", payload.clone());
-        let msg3 = Envelope::new("third", "queue", payload.clone());
-
-        let result = queue.enqueue(msg1);
-        assert!(result.is_ok());
-
-        let result = queue.enqueue(msg2);
-        assert!(result.is_ok());
+        queue.enqueue(msg1)?;
+        queue.enqueue(msg2)?;
 
         let result = queue.enqueue(msg3);
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
-            MyErr::QueueFull
+            MyErr::QueueFull(_)
         ));
+
+        Ok(())
     }
 
     #[test]
@@ -160,92 +171,81 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_with_ttl() {
+    fn enqueue_with_ttl() -> MyResult<()> {
         let ttl = Duration::from_secs(10);
-        let src = "service";
-        let dst = "queue";
+        let src = Address::new("http://service.com")?;
         let payload = Bytes::default();
 
         let queue = Queue::builder()
             .time_to_live(ttl)
             .build();
 
-        let msg = Envelope::new(src, dst, payload);
-        let res = queue.enqueue(msg);
-        assert!(res.is_ok());
+        let msg = Envelope::new(src, DST, payload);
+        queue.enqueue(msg)?;
 
-        let msg = queue.dequeue();
-        assert!(msg.is_ok());
-
-        let msg = msg.unwrap();
+        let msg = queue.dequeue()?;
         assert!(msg.is_some());
 
         let msg = msg.unwrap();
         let x_ttl = msg.get_header("x-ttl");
         assert!(x_ttl.is_some());
         assert_eq!(x_ttl.unwrap(), "10s");
+
+        Ok(())
     }
 
     #[test]
     fn fifo_ordering() -> MyResult<()> {
+        let addr1 = Address::new("http://service1.com")?;
+        let addr1_str = addr1.to_string();
+        let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
+
+        let addr2 = Address::new("http://service2.com")?;
+        let addr2_str = addr2.to_string();
+        let msg2 = Envelope::new(addr2, "queue", Bytes::from("Hello, Queue!"));
+
         let queue = Queue::default();
-
-        let msg1 = Envelope::new(
-            "first",
-            "queue",
-            Bytes::from("Hello, Queue!"),
-        );
-        let msg2 = Envelope::new(
-            "second",
-            "queue",
-            Bytes::from("Hello, Queue!"),
-        );
-
         queue.enqueue(msg1)?;
         queue.enqueue(msg2)?;
 
-        let msg = queue
-            .dequeue()?
-            .ok_or(MyErr::InvalidMessage)?;
-        assert_eq!(msg.source(), "first");
+        let msg = queue.dequeue()?;
+        assert!(msg.is_some());
+        let msg = msg.unwrap();
+        assert_eq!(msg.source().to_string(), addr1_str);
 
-        let msg = queue
-            .dequeue()?
-            .ok_or(MyErr::InvalidMessage)?;
-        assert_eq!(msg.source(), "second");
+        let msg = queue.dequeue()?;
+        assert!(msg.is_some());
+        let msg = msg.unwrap();
+        assert_eq!(msg.source().to_string(), addr2_str);
 
         Ok(())
     }
 
     #[test]
     fn unordered_queue() -> MyResult<()> {
+        let addr1 = Address::new("http://service1.com")?;
+        let addr1_str = addr1.to_string();
+        let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
+
+        let addr2 = Address::new("http://service2.com")?;
+        let addr2_str = addr2.to_string();
+        let msg2 = Envelope::new(addr2, "queue", Bytes::from("Hello, Queue!"));
+
         let queue = Queue::builder()
             .ordering("unordered")
             .build();
-
-        let msg1 = Envelope::new(
-            "first",
-            "queue",
-            Bytes::from("Hello, Queue!"),
-        );
-        let msg2 = Envelope::new(
-            "second",
-            "queue",
-            Bytes::from("Hello, Queue!"),
-        );
-
         queue.enqueue(msg1)?;
         queue.enqueue(msg2)?;
 
         let msg = queue
             .dequeue()?
             .ok_or(MyErr::InvalidMessage)?;
-        assert_eq!(msg.source(), "second");
+        assert_eq!(msg.source().to_string(), addr2_str);
 
         let msg = queue
             .dequeue()?
             .ok_or(MyErr::InvalidMessage)?;
-        assert_eq!(msg.source(), "first");
+        assert_eq!(msg.source().to_string(), addr1_str);
 
         Ok(())
     }

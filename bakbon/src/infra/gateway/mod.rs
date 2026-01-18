@@ -27,20 +27,21 @@ impl Gateway {
     }
 
     pub fn handle(&self, path: &str, payload: Bytes) -> Envelope {
-        let destination = format!("{}:/{}", self.protocol, path);
+        let destination = format!(
+            "{}://{}{}",
+            self.protocol,
+            self.address.authority(),
+            path
+        );
 
-        Envelope::new(
-            self.address.to_string(),
-            destination,
-            payload,
-        )
+        Envelope::new(self.address.clone(), destination, payload)
     }
 
-    pub fn address(&self) -> String { self.address.to_string() }
+    pub fn address(&self) -> &Address { &self.address }
 
     pub fn port(&self) -> u16 { self.port }
 
-    pub fn protocol(&self) -> &str { self.protocol.as_ref() }
+    pub fn protocol(&self) -> &Protocol { &self.protocol }
 
     pub fn max_payload_size(&self) -> Option<usize> { self.max_payload_size }
 
@@ -55,22 +56,23 @@ impl Gateway {
 mod tests {
     use super::*;
 
+    const URI: &str = "https://gateway.com";
+
     #[test]
     fn build_gateway() -> MyResult<()> {
-        let address = "https://gateway.com";
         let port = 8080;
         let payload_size = 1024;
 
-        let gateway = Gateway::builder(address, port)?
+        let gateway = Gateway::builder(URI, port)?
             .protocol("grpc")
             .max_payload_size(payload_size)
             .enable_compression()
             .build();
 
         assert!(gateway.compression());
-        assert_eq!(gateway.address(), address);
+        assert_eq!(gateway.address().to_string(), URI);
         assert_eq!(gateway.port(), port);
-        assert_eq!(gateway.protocol(), "grpc");
+        assert_eq!(gateway.protocol(), &Protocol::Grpc);
         assert_eq!(
             gateway.max_payload_size(),
             Some(payload_size)
@@ -83,15 +85,15 @@ mod tests {
         let path = "/api/v1/users";
         let payload = Bytes::from("Hello, World!");
 
-        let gateway = Gateway::builder("https://gateway.com", 8080)?
+        let gateway = Gateway::builder(URI, 8080)?
             .protocol("grpc")
             .max_payload_size(1024)
             .enable_compression()
             .build();
 
         let envelope = gateway.handle(path, payload.clone());
-        assert_eq!(envelope.source(), "https://gateway.com");
-        assert_eq!(envelope.destination(), "grpc://api/v1/users");
+        assert_eq!(envelope.source().to_string(), URI);
+        assert_eq!(envelope.destination(), "grpc://gateway.com/api/v1/users");
         assert_eq!(envelope.payload(), &payload);
         Ok(())
     }

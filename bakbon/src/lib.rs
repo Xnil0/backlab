@@ -10,8 +10,10 @@ mod service;
 
 pub use {
     core::{
+        Address,
         MyErr,
         MyResult,
+        Protocol,
     },
     infra::{
         Cache,

@@ -37,6 +37,7 @@ impl From<Store> for Cache {
 mod tests {
     use {
         super::*,
+        crate::{Address, MyResult},
         bytes::Bytes,
     };
 
@@ -50,10 +51,11 @@ mod tests {
     }
 
     #[test]
-    fn new_cache_from_store() {
+    fn new_cache_from_store() -> MyResult<()> {
+        let src = Address::new(SRC)?;
         let payload = Bytes::default();
-        let k = "msg";
-        let msg = Envelope::new(SRC, DST, payload.clone());
+        let k = "service";
+        let msg = Envelope::new(src, DST, payload.clone());
 
         let mut store = Store::default();
         store.insert(k.to_string(), msg);
@@ -63,14 +65,16 @@ mod tests {
 
         let msg = cache.get(k);
         assert!(msg.is_some());
-        assert_eq!(msg.unwrap().payload(), &payload)
+        assert_eq!(msg.unwrap().payload(), &payload);
+        Ok(())
     }
 
     #[test]
-    fn store_into_cache() {
+    fn store_into_cache() -> MyResult<()> {
+        let src = Address::new(SRC)?;
         let payload = Bytes::default();
         let k = "msg";
-        let msg = Envelope::new(SRC, DST, payload.clone());
+        let msg = Envelope::new(src, DST, payload.clone());
 
         let mut store = Store::default();
         store.insert(k.to_string(), msg);
@@ -80,25 +84,28 @@ mod tests {
 
         let msg = cache.get(k);
         assert!(msg.is_some());
-        assert_eq!(msg.unwrap().payload(), &payload)
+        assert_eq!(msg.unwrap().payload(), &payload);
+        Ok(())
     }
 
     #[test]
-    fn cache_store() {
+    fn cache_store() -> MyResult<()> {
+        let src = Address::new(SRC)?;
         let payload = Bytes::default();
-        let msg = Envelope::new(SRC, DST, payload.clone());
+        let msg = Envelope::new(src, DST, payload.clone());
 
         let k = "default";
         let mut cache = Cache::default();
-        cache.set(k, msg.clone());
+        cache.set(k, msg);
 
         let msg = cache.get(k);
         assert!(msg.is_some());
 
         let msg = msg.unwrap();
-        assert_eq!(msg.source(), SRC);
+        assert_eq!(msg.source().to_string(), SRC);
         assert_eq!(msg.destination(), DST);
         assert_eq!(msg.payload(), &payload);
+        Ok(())
     }
 
     #[test]
@@ -110,16 +117,22 @@ mod tests {
     }
 
     #[test]
-    fn clear_cache() {
+    fn clear_cache() -> MyResult<()> {
+        let src = Address::new(SRC)?;
         let payload = Bytes::default();
-        let msg = Envelope::new(SRC, DST, payload);
+        
+        let msg1 = Envelope::new(src.clone(), DST, payload.clone());
+        let msg2 = Envelope::new(src.clone(), DST, payload.clone());
+        let msg3 = Envelope::new(src.clone(), DST, payload.clone());
+        let msg4 = Envelope::new(src.clone(), DST, payload.clone());
+        let msg5 = Envelope::new(src.clone(), DST, payload.clone());
 
         let store: Store = [
-            ("msg1".to_string(), msg.clone()),
-            ("msg2".to_string(), msg.clone()),
-            ("msg3".to_string(), msg.clone()),
-            ("msg4".to_string(), msg.clone()),
-            ("msg5".to_string(), msg.clone()),
+            ("msg1".to_string(), msg1),
+            ("msg2".to_string(), msg2),
+            ("msg3".to_string(), msg3),
+            ("msg4".to_string(), msg4),
+            ("msg5".to_string(), msg5),
         ]
         .into_iter()
         .collect();
@@ -129,5 +142,6 @@ mod tests {
 
         cache.clear();
         assert!(cache.store.is_empty());
+        Ok(())
     }
 }
