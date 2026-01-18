@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub(super) struct Route {
     source:      String,
     destination: String,

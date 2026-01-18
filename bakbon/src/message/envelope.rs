@@ -6,6 +6,7 @@ use {
     bytes::Bytes,
 };
 
+#[derive(Debug, Clone)]
 pub struct Envelope {
     headers: Headers,
     route:   Route,

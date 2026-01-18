@@ -51,3 +51,75 @@ impl GatewayBuilder {
         }
     }
 }
+
+//  +------------+
+//  | UNIT TESTS |
+//  +------------+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const ADDRESS: &str = "https://gateway.com";
+    const PORT: u16 = 8080;
+
+    #[test]
+    fn default_gateway_builder() -> MyResult<()> {
+        let builder = GatewayBuilder::new(ADDRESS, PORT)?;
+        assert_eq!(builder.address.to_string(), ADDRESS);
+        assert_eq!(builder.port, PORT);
+        assert_eq!(builder.protocol, Protocol::default());
+        assert_eq!(builder.max_payload_size, None);
+        assert_eq!(builder.compression, false);
+        Ok(())
+    }
+
+    #[test]
+    fn build_default_gateway() -> MyResult<()> {
+        let builder = GatewayBuilder::new(ADDRESS, PORT)?;
+        let gateway = builder.build();
+        assert_eq!(gateway.address(), ADDRESS);
+        assert_eq!(gateway.port(), PORT);
+        assert_eq!(gateway.protocol(), "inproc");
+        assert_eq!(gateway.max_payload_size, None);
+        assert_eq!(gateway.compression, false);
+        Ok(())
+    }
+
+    #[test]
+    fn build_gateway_with_protocol() -> MyResult<()> {
+        let builder = GatewayBuilder::new(ADDRESS, PORT)?;
+        let protocol = "http";
+        let gateway = builder
+            .protocol(protocol)
+            .build();
+        assert_eq!(gateway.protocol(), "http");
+        Ok(())
+    }
+
+    #[test]
+    fn build_gateway_with_max_payload_size() -> MyResult<()> {
+        let builder = GatewayBuilder::new(ADDRESS, PORT)?;
+        let max_payload_size = 1024;
+
+        let gateway = builder
+            .max_payload_size(max_payload_size)
+            .build();
+
+        assert_eq!(
+            gateway.max_payload_size(),
+            Some(max_payload_size)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn build_gateway_with_compression() -> MyResult<()> {
+        let builder = GatewayBuilder::new(ADDRESS, PORT)?;
+        let gateway = builder
+            .enable_compression()
+            .build();
+        assert_eq!(gateway.compression(), true);
+        Ok(())
+    }
+}

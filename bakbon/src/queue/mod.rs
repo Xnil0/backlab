@@ -216,4 +216,37 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn unordered_queue() -> MyResult<()> {
+        let queue = Queue::builder()
+            .ordering("unordered")
+            .build();
+
+        let msg1 = Envelope::new(
+            "first",
+            "queue",
+            Bytes::from("Hello, Queue!"),
+        );
+        let msg2 = Envelope::new(
+            "second",
+            "queue",
+            Bytes::from("Hello, Queue!"),
+        );
+
+        queue.enqueue(msg1)?;
+        queue.enqueue(msg2)?;
+
+        let msg = queue
+            .dequeue()?
+            .ok_or(MyErr::InvalidMessage)?;
+        assert_eq!(msg.source(), "second");
+
+        let msg = queue
+            .dequeue()?
+            .ok_or(MyErr::InvalidMessage)?;
+        assert_eq!(msg.source(), "first");
+
+        Ok(())
+    }
 }
