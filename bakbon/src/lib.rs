@@ -1,6 +1,6 @@
-//! Bakbon - Infrastructure Microkernel for Distributed Systems
+//! BakBon - Infrastructure Microkernel for Distributed Systems
 //!
-//! Bakbon provides protocol-agnostic building blocks for message-driven
+//! BakBon provides protocol-agnostic building blocks for message-driven
 //! distributed systems. Build microservices, IoT networks, or blockchain
 //! infrastructure with composable, type-safe components.
 //!
@@ -46,8 +46,8 @@ pub use {
     core::{
         Address,
         Error,
-        Result,
         Protocol,
+        Result,
     },
     infra::{
         Cache,

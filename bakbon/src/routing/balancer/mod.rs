@@ -49,8 +49,8 @@ mod tests {
         crate::{
             Address,
             Envelope,
-            Result,
             Reply,
+            Result,
         },
     };
 

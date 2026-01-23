@@ -9,7 +9,7 @@ use {
 /// Uniform Resource Identifier for BakBon.
 ///
 /// Parses and stores URI-like string with the format
-/// 'scheme://authority/path?query#fragment' where:
+///`scheme://authority/path?query#fragment` where:
 ///
 /// - `scheme` is backed by [`Protocol`](crate::Protocol) (for example
 ///   `http`, `tcp`, `grpc`, `inproc`, etc.).

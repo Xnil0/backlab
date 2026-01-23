@@ -6,8 +6,8 @@ use {
     crate::{
         Envelope,
         Error,
-        Result,
         Reply,
+        Result,
     },
 };
 
@@ -45,8 +45,8 @@ impl RouterBuilder {
 /// # Example s
 ///
 /// ```rust
-/// pub struct NilService(Address); 
-/// 
+/// pub struct NilService(Address);
+///
 /// impl Service for NilService {
 ///     fn address(&self) -> &Address { &self.address }
 ///
@@ -59,7 +59,7 @@ impl RouterBuilder {
 ///         Ok(None)
 ///     }
 /// }
-/// 
+///
 /// let service = NilService(address);
 /// let mut router = Router::builder()
 ///     .registry(registry)

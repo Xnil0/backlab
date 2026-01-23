@@ -17,7 +17,7 @@
 
 ## Overview
 
-Bakbon is an lightweight infrastructure framework created to help configure, compose and build any type of message-driven distributed systems whether it is microservices, blockchain insfrastructure IoT networks, by providing core infastructure building blocks such as gateways, balancers, queues, caching systems.
+BakBon is an lightweight infrastructure framework created to help configure, compose and build any type of message-driven distributed systems whether it is microservices, blockchain insfrastructure IoT networks, by providing core infastructure building blocks such as gateways, balancers, queues, caching systems.
 
 ### Features
 
@@ -161,4 +161,4 @@ assert!(reply.is_ok());
 
 If you use this project in your application, service, or research, please include the following credit:
 
-> Based on **Bakbon** by Xn!l0 (<https://gg
+> Based on **BakBon** by Xn!l0 (<https://gg

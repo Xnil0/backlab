@@ -8,11 +8,13 @@ use {
 };
 
 /// Result type for bakbon operations.
+///
 /// Thin wrapper around `std::result::Result` with [`Error`](crate::Error)
 /// as Error type.
 pub type Result<T> = result::Result<T, Error>;
 
 /// Errors that can occur in bakbon operations.
+///
 /// Covers invalid message, invalid address, wrong balancing strategy,
 /// queue full, lock failed, service not found, and processor not found.
 #[derive(Debug)]

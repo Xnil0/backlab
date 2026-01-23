@@ -2,10 +2,10 @@ use bakbon::{
     Address,
     Envelope,
     Error,
-    Result,
     ProcMap,
     Processor,
     Reply,
+    Result,
     Service,
 };
 

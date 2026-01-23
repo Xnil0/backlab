@@ -1,8 +1,8 @@
 use {
     crate::{
         Envelope,
-        Result,
         Reply,
+        Result,
     },
     std::collections::HashMap,
 };

@@ -93,7 +93,10 @@ mod tests {
 
         let envelope = gateway.handle(path, payload.clone());
         assert_eq!(envelope.source().to_string(), URI);
-        assert_eq!(envelope.destination(), "grpc://gateway.com/api/v1/users");
+        assert_eq!(
+            envelope.destination(),
+            "grpc://gateway.com/api/v1/users"
+        );
         assert_eq!(envelope.payload(), &payload);
         Ok(())
     }

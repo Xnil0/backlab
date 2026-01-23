@@ -7,21 +7,21 @@ pub use processor::{
 use {
     super::{
         Envelope,
-        Result,
         Reply,
+        Result,
     },
     crate::Address,
 };
 
 /// A service that processes envelopes and returns replies.
 ///
-/// Implement this trait to create custom services in Bakbon.
+/// Implement this trait to create custom services in BakBon.
 ///
 /// # Examples
 ///
 /// ```rust
-/// pub struct NilService(Address); 
-/// 
+/// pub struct NilService(Address);
+///
 /// impl Service for NilService {
 ///     fn address(&self) -> &Address { &self.address }
 ///

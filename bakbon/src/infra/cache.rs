@@ -37,7 +37,10 @@ impl From<Store> for Cache {
 mod tests {
     use {
         super::*,
-        crate::{Address, Result},
+        crate::{
+            Address,
+            Result,
+        },
         bytes::Bytes,
     };
 
@@ -120,7 +123,7 @@ mod tests {
     fn clear_cache() -> Result<()> {
         let src = Address::new(SRC)?;
         let payload = Bytes::default();
-        
+
         let msg1 = Envelope::new(src.clone(), DST, payload.clone());
         let msg2 = Envelope::new(src.clone(), DST, payload.clone());
         let msg3 = Envelope::new(src.clone(), DST, payload.clone());
