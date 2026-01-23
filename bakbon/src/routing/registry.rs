@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn build_registry() -> Result<()> {
-        let address = Address::new(ADDRESS)?;
+        let address = Address::parse(ADDRESS)?;
         let instance = NoService(address);
         let registry = Registry::builder()
             .register(instance)
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn get_instances_from_registry() -> Result<()> {
-        let address = Address::new(ADDRESS)?;
+        let address = Address::parse(ADDRESS)?;
         let instance = NoService(address);
         let registry = Registry::builder()
             .register(instance)
@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn new_service_instance() -> Result<()> {
-        let address = Address::new(ADDRESS)?;
+        let address = Address::parse(ADDRESS)?;
         let instance = NoService(address);
         let mut registry = Registry::builder()
             .register(instance)

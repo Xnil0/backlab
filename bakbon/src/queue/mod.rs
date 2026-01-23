@@ -136,14 +136,15 @@ mod tests {
 
     #[test]
     fn capacity_exceeded() -> Result<()> {
-        let addr1 = Address::new("tcp://first.com")?;
-        let addr2 = Address::new("tcp://second.com")?;
-        let addr3 = Address::new("tcp://third.com")?;
+        let addr1 = Address::parse("tcp://first.com")?;
+        let addr2 = Address::parse("tcp://second.com")?;
+        let addr3 = Address::parse("tcp://third.com")?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::from("Hello, Queue!");
 
-        let msg1 = Envelope::new(addr1, DST, payload.clone());
-        let msg2 = Envelope::new(addr2, DST, payload.clone());
-        let msg3 = Envelope::new(addr3, DST, payload.clone());
+        let msg1 = Envelope::new(addr1, dst.clone(), payload.clone());
+        let msg2 = Envelope::new(addr2, dst.clone(), payload.clone());
+        let msg3 = Envelope::new(addr3, dst, payload);
 
         let queue = Queue::builder()
             .capacity(2)
@@ -173,14 +174,15 @@ mod tests {
     #[test]
     fn enqueue_with_ttl() -> Result<()> {
         let ttl = Duration::from_secs(10);
-        let src = Address::new("http://service.com")?;
+        let src = Address::parse("http://service.com")?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::default();
 
         let queue = Queue::builder()
             .time_to_live(ttl)
             .build();
 
-        let msg = Envelope::new(src, DST, payload);
+        let msg = Envelope::new(src, dst, payload);
         queue.enqueue(msg)?;
 
         let msg = queue.dequeue()?;
@@ -196,13 +198,18 @@ mod tests {
 
     #[test]
     fn fifo_ordering() -> Result<()> {
-        let addr1 = Address::new("http://service1.com")?;
+        let addr1 = Address::parse("http://service1.com")?;
         let addr1_str = addr1.to_string();
-        let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
+        let dst = Address::parse(DST)?;
+        let msg1 = Envelope::new(
+            addr1,
+            dst.clone(),
+            Bytes::from("Hello, Queue!"),
+        );
 
-        let addr2 = Address::new("http://service2.com")?;
+        let addr2 = Address::parse("http://service2.com")?;
         let addr2_str = addr2.to_string();
-        let msg2 = Envelope::new(addr2, "queue", Bytes::from("Hello, Queue!"));
+        let msg2 = Envelope::new(addr2, dst, Bytes::from("Hello, Queue!"));
 
         let queue = Queue::default();
         queue.enqueue(msg1)?;
@@ -223,13 +230,18 @@ mod tests {
 
     #[test]
     fn unordered_queue() -> Result<()> {
-        let addr1 = Address::new("http://service1.com")?;
+        let addr1 = Address::parse("http://service1.com")?;
         let addr1_str = addr1.to_string();
-        let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
+        let dst = Address::parse(DST)?;
+        let msg1 = Envelope::new(
+            addr1,
+            dst.clone(),
+            Bytes::from("Hello, Queue!"),
+        );
 
-        let addr2 = Address::new("http://service2.com")?;
+        let addr2 = Address::parse("http://service2.com")?;
         let addr2_str = addr2.to_string();
-        let msg2 = Envelope::new(addr2, "queue", Bytes::from("Hello, Queue!"));
+        let msg2 = Envelope::new(addr2, dst, Bytes::from("Hello, Queue!"));
 
         let queue = Queue::builder()
             .ordering("unordered")

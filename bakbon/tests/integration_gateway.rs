@@ -21,7 +21,7 @@ fn gateway_to_router_to_service() -> Result<()> {
 
     // Create Echo Service.
     let srv_uri = "inproc://service.com/echo";
-    let srv_addr = Address::new(srv_uri);
+    let srv_addr = Address::parse(srv_uri);
     assert!(srv_addr.is_ok());
 
     let srv_addr = srv_addr.unwrap();
@@ -53,9 +53,9 @@ fn gateway_to_router_to_service() -> Result<()> {
         .build();
     assert_eq!(gateway.protocol(), &Protocol::InProc);
 
-    let msg = gateway.handle(path, payload.clone());
+    let msg = gateway.handle(path, payload.clone())?;
     assert_eq!(msg.source(), gateway.address());
-    assert_eq!(msg.destination(), srv_uri);
+    assert_eq!(msg.destination(), &srv_addr);
     assert_eq!(msg.payload(), &payload);
 
     // Get and Process Reply.
@@ -68,9 +68,6 @@ fn gateway_to_router_to_service() -> Result<()> {
     let reply = reply.unwrap();
     assert_eq!(reply.payload(), &payload);
     assert_eq!(reply.source(), &srv_addr);
-    assert_eq!(
-        reply.destination(),
-        gateway.address().to_string()
-    );
+    assert_eq!(reply.destination(), gateway.address());
     Ok(())
 }

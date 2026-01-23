@@ -3,20 +3,24 @@ use crate::Address;
 #[derive(Debug)]
 pub(super) struct Route {
     source:      Address,
-    destination: String,
+    destination: Address,
 }
 
 impl Route {
-    pub(super) fn new(src: Address, dst: impl ToString) -> Self {
+    pub(super) fn new(src: Address, dst: Address) -> Self {
         Self {
             source:      src,
-            destination: dst.to_string(),
+            destination: dst,
         }
+    }
+
+    pub(super) fn swap_endpoints(&mut self) {
+        std::mem::swap(&mut self.source, &mut self.destination);
     }
 
     pub(super) fn source(&self) -> &Address { &self.source }
 
-    pub(super) fn destination(&self) -> &str { &self.destination }
+    pub(super) fn destination(&self) -> &Address { &self.destination }
 }
 
 //  +------------+
@@ -26,57 +30,21 @@ impl Route {
 #[cfg(test)]
 mod tests {
 
-    use {
-        super::*,
-        crate::Error,
-    };
+    use super::*;
 
     #[test]
     fn new_route() {
-        let source = Address::new("https://source.com/");
+        let source = Address::parse("https://source.com/");
         assert!(source.is_ok());
         let source = source.unwrap();
-        let source_str = source.to_string();
 
-        let destination = "https://destination.com/";
-        let route = Route::new(source, destination);
+        let destination = Address::parse("https://destination.com/");
+        assert!(destination.is_ok());
+        let destination = destination.unwrap();
 
-        assert_eq!(
-            route.source(),
-            &Address::new(source_str.as_str()).unwrap()
-        );
-        assert_eq!(
-            route
-                .destination()
-                .to_string(),
-            destination
-        );
-    }
+        let route = Route::new(source.clone(), destination.clone());
 
-    #[test]
-    fn new_route_with_empty_source() {
-        let source = Address::new("");
-        assert!(source.is_err());
-        assert!(matches!(
-            source.unwrap_err(),
-            Error::InvalidAddress
-        ));
-    }
-
-    #[test]
-    fn new_route_with_empty_destination() {
-        let source = Address::new("https://source.com/");
-        assert!(source.is_ok());
-        let source = source.unwrap();
-        let source_str = source.to_string();
-
-        let destination = "";
-        let route = Route::new(source, destination);
-
-        assert_eq!(
-            route.source(),
-            &Address::new(source_str.as_str()).unwrap()
-        );
-        assert!(route.destination().is_empty(),);
+        assert_eq!(route.source(), &source);
+        assert_eq!(route.destination(), &destination);
     }
 }

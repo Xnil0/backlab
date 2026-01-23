@@ -18,13 +18,13 @@ mod common;
 fn queue_to_router_to_service() {
     // Create Client Address.
     let client_uri = "http://client-service.com";
-    let client_addr = Address::new(client_uri);
+    let client_addr = Address::parse(client_uri);
     assert!(client_addr.is_ok());
     let client_addr = client_addr.unwrap();
 
     // Create Echo Service.
     let srv_uri = "http://service.com/echo";
-    let srv_addr = Address::new(srv_uri);
+    let srv_addr = Address::parse(srv_uri);
     assert!(srv_addr.is_ok());
     let srv_addr = srv_addr.unwrap();
     let service = EchoService::new(srv_addr.clone());
@@ -32,9 +32,21 @@ fn queue_to_router_to_service() {
 
     // Create the Message.
     let payload = Bytes::from("Hello...");
-    let msg1 = Envelope::new(client_addr.clone(), srv_uri, payload.clone());
-    let msg2 = Envelope::new(client_addr.clone(), srv_uri, payload.clone());
-    let msg3 = Envelope::new(client_addr.clone(), srv_uri, payload.clone());
+    let msg1 = Envelope::new(
+        client_addr.clone(),
+        srv_addr.clone(),
+        payload.clone(),
+    );
+    let msg2 = Envelope::new(
+        client_addr.clone(),
+        srv_addr.clone(),
+        payload.clone(),
+    );
+    let msg3 = Envelope::new(
+        client_addr.clone(),
+        srv_addr,
+        payload.clone(),
+    );
 
     // Build Queue.
     let queue = Queue::builder()
@@ -93,5 +105,5 @@ fn queue_to_router_to_service() {
 
     // Check Addresses Swap.
     assert_eq!(reply.source().to_string(), srv_uri);
-    assert_eq!(reply.destination(), client_uri);
+    assert_eq!(reply.destination(), &client_addr);
 }

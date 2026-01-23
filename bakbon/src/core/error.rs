@@ -116,11 +116,11 @@ mod tests {
 
     #[test]
     fn queue_full_error() -> Result<()> {
-        let src = Address::new("http://source.com")?;
-        let dst = "http://destination.com";
+        let src = Address::parse("http://source.com")?;
+        let dst = Address::parse("http://destination.com")?;
         let payload = Bytes::default();
 
-        let msg = Envelope::new(src.clone(), dst, payload.clone());
+        let msg = Envelope::new(src.clone(), dst.clone(), payload.clone());
         let queue_full = Error::QueueFull(msg);
         assert!(matches!(queue_full, Error::QueueFull(_)));
         assert_eq!(

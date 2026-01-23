@@ -13,13 +13,8 @@ pub struct EchoProc;
 
 impl Processor for EchoProc {
     fn execute(&self, msg: Envelope) -> Result<Reply> {
-        let src = Address::new(msg.destination()).unwrap();
-        let dst = msg.source().to_string();
         let payload = msg.payload().clone();
-
-        let mut reply = Envelope::new(src, dst, payload);
-        reply.copy_headers(msg);
-
+        let reply = msg.into_reply(payload);
         Ok(Some(reply))
     }
 }

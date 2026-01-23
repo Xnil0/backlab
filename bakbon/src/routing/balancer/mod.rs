@@ -87,9 +87,9 @@ mod tests {
         let src2 = "http://no-service-2.com";
         let src3 = "http://no-service-3.com";
 
-        let addr1 = Address::new(src1)?;
-        let addr2 = Address::new(src2)?;
-        let addr3 = Address::new(src3)?;
+        let addr1 = Address::parse(src1)?;
+        let addr2 = Address::parse(src2)?;
+        let addr3 = Address::parse(src3)?;
 
         let srv1 = NoService(addr1);
         let srv2 = NoService(addr2);

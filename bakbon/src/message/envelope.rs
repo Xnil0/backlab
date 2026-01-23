@@ -7,6 +7,8 @@ use {
     bytes::Bytes,
 };
 
+/// Envelope is a message wrapper that contains headers, route, and
+/// payload.
 #[derive(Debug)]
 pub struct Envelope {
     headers: Headers,
@@ -15,7 +17,7 @@ pub struct Envelope {
 }
 
 impl Envelope {
-    pub fn new(src: Address, dst: impl ToString, payload: Bytes) -> Self {
+    pub fn new(src: Address, dst: Address, payload: Bytes) -> Self {
         Self {
             headers: Headers::default(),
             route: Route::new(src, dst),
@@ -40,19 +42,17 @@ impl Envelope {
             .map(|v| v.as_str())
     }
 
-    pub fn copy_headers(&mut self, msg: Self) {
-        for (k, v) in msg.headers {
-            if self.headers.get(&k).is_none() {
-                self.headers.insert(k, v);
-            }
-        }
+    pub fn into_reply(mut self, payload: Bytes) -> Self {
+        self.route.swap_endpoints();
+        self.payload = payload;
+        self
     }
 
     pub fn payload(&self) -> &Bytes { &self.payload }
 
     pub fn source(&self) -> &Address { &self.route.source() }
 
-    pub fn destination(&self) -> &str { &self.route.destination() }
+    pub fn destination(&self) -> &Address { &self.route.destination() }
 }
 
 //  +------------+
@@ -68,12 +68,16 @@ mod tests {
 
     #[test]
     fn new_message_with_payload() {
-        let src = Address::new(SRC);
+        let src = Address::parse(SRC);
         assert!(src.is_ok());
         let src = src.unwrap();
 
+        let dst = Address::parse(DST);
+        assert!(dst.is_ok());
+        let dst = dst.unwrap();
+
         let payload = Bytes::from("random_payload");
-        let msg = Envelope::new(src, DST, payload.clone());
+        let msg = Envelope::new(src, dst, payload.clone());
 
         assert!(!msg.payload().is_empty());
         assert_eq!(msg.payload(), &payload);
@@ -81,25 +85,33 @@ mod tests {
 
     #[test]
     fn new_message_with_empty_payload() {
-        let src = Address::new(SRC);
+        let src = Address::parse(SRC);
         assert!(src.is_ok());
         let src = src.unwrap();
 
+        let dst = Address::parse(DST);
+        assert!(dst.is_ok());
+        let dst = dst.unwrap();
+
         let payload: Bytes = Bytes::new();
-        let msg = Envelope::new(src, DST, payload);
+        let msg = Envelope::new(src, dst, payload);
 
         assert!(msg.payload().is_empty());
     }
 
     #[test]
     fn new_message_with_headers() {
-        let src = Address::new(SRC);
+        let src = Address::parse(SRC);
         assert!(src.is_ok());
         let src = src.unwrap();
 
+        let dst = Address::parse(DST);
+        assert!(dst.is_ok());
+        let dst = dst.unwrap();
+
         let payload = Bytes::from("random_payload");
 
-        let msg = Envelope::new(src, DST, payload)
+        let msg = Envelope::new(src, dst, payload)
             .header("content-type", "text/plain")
             .header("encoding", "utf-8");
 
@@ -114,22 +126,21 @@ mod tests {
 
     #[test]
     fn copy_headers() {
-        let src = Address::new(SRC);
+        let src = Address::parse(SRC);
         assert!(src.is_ok());
         let src = src.unwrap();
 
-        let payload = Bytes::from("random_payload");
-
-        let msg = Envelope::new(src, DST, payload.clone())
-            .header("content-type", "text/plain")
-            .header("encoding", "utf-8");
-
-        let dst = Address::new(DST);
+        let dst = Address::parse(DST);
         assert!(dst.is_ok());
         let dst = dst.unwrap();
 
-        let mut reply = Envelope::new(dst, SRC, payload.clone());
-        reply.copy_headers(msg);
+        let payload = Bytes::from("random_payload");
+
+        let msg = Envelope::new(src.clone(), dst.clone(), payload.clone())
+            .header("content-type", "text/plain")
+            .header("encoding", "utf-8");
+
+        let reply = msg.into_reply(payload);
 
         let content_type = reply.get_header("content-type");
         assert!(content_type.is_some());

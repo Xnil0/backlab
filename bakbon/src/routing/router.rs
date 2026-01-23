@@ -79,7 +79,11 @@ impl Router {
     pub fn route(&mut self, msg: Envelope) -> Result<Reply> {
         let instances = self
             .registry
-            .get(msg.destination())
+            .get(
+                msg.destination()
+                    .to_string()
+                    .as_str(),
+            )
             .ok_or(Error::ServiceNotFound)?;
 
         let service = self

@@ -16,13 +16,13 @@ use {
 fn router_to_service() {
     // Create Client Address.
     let client_uri = "http://client-service.com";
-    let client_addr = Address::new(client_uri);
+    let client_addr = Address::parse(client_uri);
     assert!(client_addr.is_ok());
     let client_addr = client_addr.unwrap();
 
     // Create Echo Service.
     let srv_uri = "http://service.com/echo";
-    let srv_addr = Address::new(srv_uri);
+    let srv_addr = Address::parse(srv_uri);
     assert!(srv_addr.is_ok());
     let srv_addr = srv_addr.unwrap();
     let service = EchoService::new(srv_addr.clone());
@@ -42,9 +42,13 @@ fn router_to_service() {
 
     // Create the Message.
     let payload = Bytes::from("Hello...");
-    let msg = Envelope::new(client_addr, srv_uri, payload.clone())
-        .header("content-type", "text/plain")
-        .header("encoding", "utf-8");
+    let msg = Envelope::new(
+        client_addr.clone(),
+        srv_addr,
+        payload.clone(),
+    )
+    .header("content-type", "text/plain")
+    .header("encoding", "utf-8");
 
     // Get Reply from Router.
     let reply = router.route(msg);
@@ -58,7 +62,7 @@ fn router_to_service() {
 
     // Check Addresses Swap.
     assert_eq!(reply.source().to_string(), srv_uri);
-    assert_eq!(reply.destination(), client_uri);
+    assert_eq!(reply.destination(), &client_addr);
 
     // Check Headers.
     let content_type = reply.get_header("content-type");

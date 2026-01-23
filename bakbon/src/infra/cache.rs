@@ -55,10 +55,11 @@ mod tests {
 
     #[test]
     fn new_cache_from_store() -> Result<()> {
-        let src = Address::new(SRC)?;
+        let src = Address::parse(SRC)?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::default();
         let k = "service";
-        let msg = Envelope::new(src, DST, payload.clone());
+        let msg = Envelope::new(src, dst, payload.clone());
 
         let mut store = Store::default();
         store.insert(k.to_string(), msg);
@@ -74,10 +75,11 @@ mod tests {
 
     #[test]
     fn store_into_cache() -> Result<()> {
-        let src = Address::new(SRC)?;
+        let src = Address::parse(SRC)?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::default();
         let k = "msg";
-        let msg = Envelope::new(src, DST, payload.clone());
+        let msg = Envelope::new(src, dst, payload.clone());
 
         let mut store = Store::default();
         store.insert(k.to_string(), msg);
@@ -93,9 +95,10 @@ mod tests {
 
     #[test]
     fn cache_store() -> Result<()> {
-        let src = Address::new(SRC)?;
+        let src = Address::parse(SRC)?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::default();
-        let msg = Envelope::new(src, DST, payload.clone());
+        let msg = Envelope::new(src.clone(), dst.clone(), payload.clone());
 
         let k = "default";
         let mut cache = Cache::default();
@@ -105,8 +108,8 @@ mod tests {
         assert!(msg.is_some());
 
         let msg = msg.unwrap();
-        assert_eq!(msg.source().to_string(), SRC);
-        assert_eq!(msg.destination(), DST);
+        assert_eq!(msg.source(), &src);
+        assert_eq!(msg.destination(), &dst);
         assert_eq!(msg.payload(), &payload);
         Ok(())
     }
@@ -121,14 +124,15 @@ mod tests {
 
     #[test]
     fn clear_cache() -> Result<()> {
-        let src = Address::new(SRC)?;
+        let src = Address::parse(SRC)?;
+        let dst = Address::parse(DST)?;
         let payload = Bytes::default();
 
-        let msg1 = Envelope::new(src.clone(), DST, payload.clone());
-        let msg2 = Envelope::new(src.clone(), DST, payload.clone());
-        let msg3 = Envelope::new(src.clone(), DST, payload.clone());
-        let msg4 = Envelope::new(src.clone(), DST, payload.clone());
-        let msg5 = Envelope::new(src.clone(), DST, payload.clone());
+        let msg1 = Envelope::new(src.clone(), dst.clone(), payload.clone());
+        let msg2 = Envelope::new(src.clone(), dst.clone(), payload.clone());
+        let msg3 = Envelope::new(src.clone(), dst.clone(), payload.clone());
+        let msg4 = Envelope::new(src.clone(), dst.clone(), payload.clone());
+        let msg5 = Envelope::new(src.clone(), dst.clone(), payload.clone());
 
         let store: Store = [
             ("msg1".to_string(), msg1),

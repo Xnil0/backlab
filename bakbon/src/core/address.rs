@@ -9,7 +9,7 @@ use {
 /// Uniform Resource Identifier for BakBon.
 ///
 /// Parses and stores URI-like string with the format
-///`scheme://authority/path?query#fragment` where:
+/// `scheme://authority/path?query#fragment` where:
 ///
 /// - `scheme` is backed by [`Protocol`](crate::Protocol) (for example
 ///   `http`, `tcp`, `grpc`, `inproc`, etc.).
@@ -25,7 +25,7 @@ use {
 /// use bakbon::*;
 ///
 /// let uri = "https://services.com/path/to/resource?id=123&name=test#section1";
-/// let address: Result<Address> = Address::new(uri); // or uri.try_into()
+/// let address: Result<Address> = Address::parse(uri); // or uri.try_into()
 /// assert!(address.is_ok());
 ///
 /// let address = address.unwrap();
@@ -50,7 +50,7 @@ pub struct Address {
 }
 
 impl Address {
-    pub fn new(uri: &str) -> Result<Self> { uri.try_into() }
+    pub fn parse(uri: impl Into<String>) -> Result<Self> { uri.into().as_str().try_into() }
 
     pub fn scheme(&self) -> &Protocol { &self.scheme }
 
@@ -129,7 +129,7 @@ mod tests {
     #[test]
     fn new_address() {
         let uri = "tcp://url-address.com";
-        let address: Result<Address> = Address::new(uri);
+        let address: Result<Address> = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn address_to_string() {
         let uri = "grpc://address-url.com";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn address_with_custom_protocol() {
         let uri = "mpsc://uri-address.custom";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -186,7 +186,7 @@ mod tests {
     #[test]
     fn address_with_path() {
         let uri = "tcp://address-url.com/path";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -197,7 +197,7 @@ mod tests {
     #[test]
     fn address_with_query() {
         let uri = "tcp://address-url.com/path?query=param";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -209,7 +209,7 @@ mod tests {
     #[test]
     fn address_with_fragment() {
         let uri = "tcp://address-url.com/path#fragment";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -221,27 +221,27 @@ mod tests {
     #[test]
     fn invalid_address() {
         let uri = "clearly_invalid";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_err());
     }
 
     #[test]
     fn empty_address() {
-        let address = Address::new("");
+        let address = Address::parse("");
         assert!(address.is_err());
     }
 
     #[test]
     fn incomplete_address() {
         let uri = "grpc://";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_err());
     }
 
     #[test]
     fn complete_address_without_path() {
         let uri = "tcp://authority.com?query=param#fragment";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -255,7 +255,7 @@ mod tests {
     #[test]
     fn complete_address_without_query() {
         let uri = "http://authority.com/path#fragment";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn complete_address_without_fragment() {
         let uri = "grpc://authority.com/path?query=param";
-        let address = Address::new(uri);
+        let address = Address::parse(uri);
         assert!(address.is_ok());
 
         let address = address.unwrap();

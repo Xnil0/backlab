@@ -132,7 +132,7 @@ use bakbon::*;
 let url = "http://services.com/echo";
 
 // Create an address from url
-let address: Result<Address> = Address::new(url);
+let address: Result<Address> = Address::parse(url);
 assert!(address.is_ok());
 
 // Create a service with the address

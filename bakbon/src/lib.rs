@@ -13,7 +13,7 @@
 //! };
 //!
 //! // Create an address.
-//! let source = Address::new("http://client-address.com").unwrap();
+//! let source = Address::parse("http://client-address.com").unwrap();
 //! let destination = "grpc://service.com/echo";
 //!
 //! // Create a payload from the bytes crate.
@@ -23,7 +23,7 @@
 //! let message = Envelope::new(source, destination , payload);
 //!
 //! // EchoService is a custom struct implementing Service from tests/
-//! let dst_addr = Address::new(destination).unwrap();
+//! let dst_addr = Address::parse(destination).unwrap();
 //! let service = EchoService::new(dst_addr);
 //! let registry = Registry::builder()
 //!     .register(service)

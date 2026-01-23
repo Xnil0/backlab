@@ -26,15 +26,12 @@ impl Gateway {
         GatewayBuilder::new(address, port)
     }
 
-    pub fn handle(&self, path: &str, payload: Bytes) -> Envelope {
-        let destination = format!(
-            "{}://{}{}",
-            self.protocol,
-            self.address.authority(),
-            path
-        );
+    pub fn handle(&self, path: &str, payload: Bytes) -> Result<Envelope> {
+        let dst_str = format!("{}:/{}", self.protocol, path);
+        let destination = Address::parse(dst_str.as_str())?;
 
-        Envelope::new(self.address.clone(), destination, payload)
+        let msg = Envelope::new(self.address.clone(), destination, payload);
+        Ok(msg)
     }
 
     pub fn address(&self) -> &Address { &self.address }
@@ -91,13 +88,13 @@ mod tests {
             .enable_compression()
             .build();
 
-        let envelope = gateway.handle(path, payload.clone());
-        assert_eq!(envelope.source().to_string(), URI);
+        let msg = gateway.handle(path, payload.clone())?;
+        assert_eq!(msg.source().to_string(), URI);
         assert_eq!(
-            envelope.destination(),
+            msg.destination().to_string(),
             "grpc://gateway.com/api/v1/users"
         );
-        assert_eq!(envelope.payload(), &payload);
+        assert_eq!(msg.payload(), &payload);
         Ok(())
     }
 }
