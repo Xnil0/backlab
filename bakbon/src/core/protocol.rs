@@ -1,8 +1,46 @@
 use std::fmt;
 
+/// Transport protocol used in BakBon addresses and gateways.
+///
+/// Models how messages are transmitted between nodes, via for
+/// example 'TCP' (Transmission Control Protocol), 'HTTP' (HyperText
+/// Transfer Protocol) 'GRPC' (Google Remote Procedure Call), 'MQTT' (Message
+/// Queuing Telemetry Transport), and more...
+///
+/// Appears in [`Address`](crate::Address) as the 'URI' scheme and in
+/// [`Gateway`](crate::Gateway) to define how external requests are turned
+/// into internal messages.
+///
+/// The 'Http' variant switches between http and https protocol via the
+/// 'secure' flag and the 'Custom' variant lets support and define any
+/// additional protocol.
+///
+/// # Defaults
+///
+/// The default 'Protocol' variant is 'InProc', which is suitable for
+/// in-process testing and local implementations.
+///
+/// # Examples
+///
+/// ```
+/// use bakbon::Protocol;
+///
+/// let protocol = Protocol::Http { secure: true };
+/// assert_eq!(protocol.as_ref(), "https");
+/// 
+/// let protocol = Protocol::Custom("myproto".to_string());
+/// assert_eq!(protocol.as_ref(), "myproto");
+/// 
+/// let protocol = Protocol::from("http");
+/// assert_eq!(protocol.as_ref(), "http");
+/// 
+/// if let Protocol::Http { secure } = protocol {
+///     assert!(!secure);
+/// }
+/// ```
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Protocol {
-    Tcp,
+    Tcp, 
     Udp,
     Http { secure: bool },
     Grpc,

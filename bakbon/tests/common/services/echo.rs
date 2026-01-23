@@ -1,8 +1,8 @@
 use bakbon::{
     Address,
     Envelope,
-    MyErr,
-    MyResult,
+    Error,
+    Result,
     ProcMap,
     Processor,
     Reply,
@@ -12,7 +12,7 @@ use bakbon::{
 pub struct EchoProc;
 
 impl Processor for EchoProc {
-    fn execute(&self, msg: Envelope) -> MyResult<Reply> {
+    fn execute(&self, msg: Envelope) -> Result<Reply> {
         let src = Address::new(msg.destination()).unwrap();
         let dst = msg.source().to_string();
         let payload = msg.payload().clone();
@@ -46,11 +46,11 @@ impl Service for EchoService {
 
     fn duplicate(&self) -> Box<dyn Service> { Box::new(Self::new(self.address.clone())) }
 
-    fn process(&self, message: Envelope) -> MyResult<Reply> {
+    fn process(&self, message: Envelope) -> Result<Reply> {
         let path = self.address.path();
         match self.processors.get(path) {
             Some(processor) => processor.execute(message),
-            None => Err(MyErr::ProcessorNotFound),
+            None => Err(Error::ProcessorNotFound),
         }
     }
 }

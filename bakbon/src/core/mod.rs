@@ -5,8 +5,8 @@ mod protocol;
 pub use {
     address::Address,
     error::{
-        MyErr,
-        MyResult,
+        Error,
+        Result,
     },
     protocol::Protocol,
 };

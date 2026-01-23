@@ -1,8 +1,8 @@
 use crate::{
     Envelope,
-    MyResult,
+    Result,
 };
 
 pub trait Middleware {
-    fn intercept(&self, message: Envelope) -> MyResult<Envelope>;
+    fn intercept(&self, message: Envelope) -> Result<Envelope>;
 }

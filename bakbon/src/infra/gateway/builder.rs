@@ -1,6 +1,6 @@
 use crate::{
     Gateway,
-    MyResult,
+    Result,
     core::{
         Address,
         Protocol,
@@ -16,7 +16,7 @@ pub struct GatewayBuilder {
 }
 
 impl GatewayBuilder {
-    pub(super) fn new(address: &str, port: u16) -> MyResult<Self> {
+    pub(super) fn new(address: &str, port: u16) -> Result<Self> {
         Ok(Self {
             address: address.try_into()?,
             port,
@@ -64,7 +64,7 @@ mod tests {
     const PORT: u16 = 8080;
 
     #[test]
-    fn default_gateway_builder() -> MyResult<()> {
+    fn default_gateway_builder() -> Result<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         assert_eq!(builder.address.to_string(), ADDRESS);
         assert_eq!(builder.port, PORT);
@@ -75,7 +75,7 @@ mod tests {
     }
 
     #[test]
-    fn build_default_gateway() -> MyResult<()> {
+    fn build_default_gateway() -> Result<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         let gateway = builder.build();
         assert_eq!(gateway.address().to_string(), ADDRESS);
@@ -87,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    fn build_gateway_with_protocol() -> MyResult<()> {
+    fn build_gateway_with_protocol() -> Result<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         let protocol = "http";
         let gateway = builder
@@ -103,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    fn build_gateway_with_max_payload_size() -> MyResult<()> {
+    fn build_gateway_with_max_payload_size() -> Result<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         let max_payload_size = 1024;
 
@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn build_gateway_with_compression() -> MyResult<()> {
+    fn build_gateway_with_compression() -> Result<()> {
         let builder = GatewayBuilder::new(ADDRESS, PORT)?;
         let gateway = builder
             .enable_compression()

@@ -3,7 +3,7 @@ use {
     bakbon::{
         Address,
         Envelope,
-        MyErr,
+        Error,
         Queue,
         Registry,
         Router,
@@ -65,7 +65,7 @@ fn queue_to_router_to_service() {
     let msg3 = queue.enqueue(msg3);
     assert!(msg3.is_err());
     let msg3 = match msg3.unwrap_err() {
-        MyErr::QueueFull(msg) => msg,
+        Error::QueueFull(msg) => msg,
         _ => panic!("Unexpected error"),
     };
 

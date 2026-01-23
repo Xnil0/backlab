@@ -4,8 +4,8 @@ mod builder;
 use {
     crate::{
         Envelope,
-        MyErr,
-        MyResult,
+        Error,
+        Result,
     },
     attributes::{
         DeliveryGuarantee,
@@ -35,12 +35,12 @@ pub struct Queue {
 impl Queue {
     pub fn builder() -> QueueBuilder { QueueBuilder::default() }
 
-    pub fn enqueue(&self, mut msg: Envelope) -> MyResult<()> {
+    pub fn enqueue(&self, mut msg: Envelope) -> Result<()> {
         let mut buffer = self.buffer.lock()?;
 
         if let Some(capacity) = self.capacity {
             if buffer.len() >= capacity {
-                return Err(MyErr::QueueFull(msg));
+                return Err(Error::QueueFull(msg));
             };
         }
         if self.ttl.is_some() {
@@ -58,7 +58,7 @@ impl Queue {
         Ok(())
     }
 
-    pub fn dequeue(&self) -> MyResult<Option<Envelope>> {
+    pub fn dequeue(&self) -> Result<Option<Envelope>> {
         let mut buffer = self.buffer.lock()?;
 
         match buffer.pop_front() {
@@ -135,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn capacity_exceeded() -> MyResult<()> {
+    fn capacity_exceeded() -> Result<()> {
         let addr1 = Address::new("tcp://first.com")?;
         let addr2 = Address::new("tcp://second.com")?;
         let addr3 = Address::new("tcp://third.com")?;
@@ -156,7 +156,7 @@ mod tests {
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
-            MyErr::QueueFull(_)
+            Error::QueueFull(_)
         ));
 
         Ok(())
@@ -171,7 +171,7 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_with_ttl() -> MyResult<()> {
+    fn enqueue_with_ttl() -> Result<()> {
         let ttl = Duration::from_secs(10);
         let src = Address::new("http://service.com")?;
         let payload = Bytes::default();
@@ -195,7 +195,7 @@ mod tests {
     }
 
     #[test]
-    fn fifo_ordering() -> MyResult<()> {
+    fn fifo_ordering() -> Result<()> {
         let addr1 = Address::new("http://service1.com")?;
         let addr1_str = addr1.to_string();
         let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
@@ -222,7 +222,7 @@ mod tests {
     }
 
     #[test]
-    fn unordered_queue() -> MyResult<()> {
+    fn unordered_queue() -> Result<()> {
         let addr1 = Address::new("http://service1.com")?;
         let addr1_str = addr1.to_string();
         let msg1 = Envelope::new(addr1, "queue", Bytes::from("Hello, Queue!"));
@@ -239,12 +239,12 @@ mod tests {
 
         let msg = queue
             .dequeue()?
-            .ok_or(MyErr::InvalidMessage)?;
+            .ok_or(Error::InvalidMessage)?;
         assert_eq!(msg.source().to_string(), addr2_str);
 
         let msg = queue
             .dequeue()?
-            .ok_or(MyErr::InvalidMessage)?;
+            .ok_or(Error::InvalidMessage)?;
         assert_eq!(msg.source().to_string(), addr1_str);
 
         Ok(())

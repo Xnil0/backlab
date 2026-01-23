@@ -2,14 +2,21 @@ use {
     crate::Envelope,
     std::{
         fmt,
+        result,
         sync::PoisonError,
     },
 };
 
-pub type MyResult<T> = Result<T, MyErr>;
+/// Result type for bakbon operations.
+/// Thin wrapper around `std::result::Result` with [`Error`](crate::Error)
+/// as Error type.
+pub type Result<T> = result::Result<T, Error>;
 
+/// Errors that can occur in bakbon operations.
+/// Covers invalid message, invalid address, wrong balancing strategy,
+/// queue full, lock failed, service not found, and processor not found.
 #[derive(Debug)]
-pub enum MyErr {
+pub enum Error {
     InvalidMessage,
     InvalidAddress,
     WrongStrategy,
@@ -19,11 +26,11 @@ pub enum MyErr {
     ProcessorNotFound,
 }
 
-impl<T> From<PoisonError<T>> for MyErr {
+impl<T> From<PoisonError<T>> for Error {
     fn from(e: PoisonError<T>) -> Self { Self::LockFailed(format!("Lock Poisoned: {e}")) }
 }
 
-impl fmt::Display for MyErr {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::InvalidMessage => f.write_str("Invalid message."),
@@ -58,12 +65,12 @@ mod tests {
 
     #[test]
     fn error_display() {
-        let empty_msg_id = MyErr::InvalidMessage;
-        let invalid_addr = MyErr::InvalidAddress;
-        let wrong_strategy = MyErr::WrongStrategy;
-        let lock_failed = MyErr::LockFailed("test".to_string());
-        let service_not_found = MyErr::ServiceNotFound;
-        let processor_not_found = MyErr::ProcessorNotFound;
+        let empty_msg_id = Error::InvalidMessage;
+        let invalid_addr = Error::InvalidAddress;
+        let wrong_strategy = Error::WrongStrategy;
+        let lock_failed = Error::LockFailed("test".to_string());
+        let service_not_found = Error::ServiceNotFound;
+        let processor_not_found = Error::ProcessorNotFound;
 
         assert_eq!(empty_msg_id.to_string(), "Invalid message.");
         assert_eq!(invalid_addr.to_string(), "Invalid address.");
@@ -97,23 +104,23 @@ mod tests {
         })
         .join();
 
-        let err: MyErr = data
+        let err: Error = data
             .lock()
             .unwrap_err()
             .into();
 
-        assert!(matches!(err, MyErr::LockFailed(_)))
+        assert!(matches!(err, Error::LockFailed(_)))
     }
 
     #[test]
-    fn queue_full_error() -> MyResult<()> {
+    fn queue_full_error() -> Result<()> {
         let src = Address::new("http://source.com")?;
         let dst = "http://destination.com";
         let payload = Bytes::default();
 
         let msg = Envelope::new(src.clone(), dst, payload.clone());
-        let queue_full = MyErr::QueueFull(msg);
-        assert!(matches!(queue_full, MyErr::QueueFull(_)));
+        let queue_full = Error::QueueFull(msg);
+        assert!(matches!(queue_full, Error::QueueFull(_)));
         assert_eq!(
             queue_full.to_string(),
             format!(

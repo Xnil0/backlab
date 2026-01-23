@@ -3,13 +3,13 @@ mod common;
 use {
     crate::common::EchoService,
     bakbon::{
-        Address, Gateway, MyResult, Protocol, Registry, Router, Service
+        Address, Gateway, Result, Protocol, Registry, Router, Service
     },
     bytes::Bytes,
 };
 
 #[test]
-fn gateway_to_router_to_service() ->MyResult<()> {
+fn gateway_to_router_to_service() ->Result<()> {
     let path = "/echo";
     let payload = Bytes::from("Hello, World!");
 

@@ -28,7 +28,7 @@ mod tests {
 
     use {
         super::*,
-        crate::MyErr,
+        crate::Error,
     };
 
     #[test]
@@ -59,7 +59,7 @@ mod tests {
         assert!(source.is_err());
         assert!(matches!(
             source.unwrap_err(),
-            MyErr::InvalidAddress
+            Error::InvalidAddress
         ));
     }
 

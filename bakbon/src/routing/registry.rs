@@ -1,8 +1,8 @@
 use {
     super::Service,
     crate::{
-        MyErr,
-        MyResult,
+        Error,
+        Result,
     },
     std::collections::HashMap,
 };
@@ -32,11 +32,11 @@ pub struct Registry(pub(super) ServiceMap);
 impl Registry {
     pub fn builder() -> RegistryBuilder { RegistryBuilder::default() }
 
-    pub fn add_instance(&mut self, address: &str) -> MyResult<()> {
+    pub fn add_instance(&mut self, address: &str) -> Result<()> {
         let instances = self
             .0
             .get_mut(address)
-            .ok_or(MyErr::ServiceNotFound)?;
+            .ok_or(Error::ServiceNotFound)?;
 
         let new_instance = instances
             .last()
@@ -100,7 +100,7 @@ mod tests {
 
         fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
 
-        fn process(&self, _message: Envelope) -> MyResult<Reply> { Ok(None) }
+        fn process(&self, _message: Envelope) -> Result<Reply> { Ok(None) }
     }
 
     #[test]
@@ -110,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn build_registry() -> MyResult<()> {
+    fn build_registry() -> Result<()> {
         let address = Address::new(ADDRESS)?;
         let instance = NoService(address);
         let registry = Registry::builder()
@@ -125,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn get_instances_from_registry() -> MyResult<()> {
+    fn get_instances_from_registry() -> Result<()> {
         let address = Address::new(ADDRESS)?;
         let instance = NoService(address);
         let registry = Registry::builder()
@@ -139,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn new_service_instance() -> MyResult<()> {
+    fn new_service_instance() -> Result<()> {
         let address = Address::new(ADDRESS)?;
         let instance = NoService(address);
         let mut registry = Registry::builder()

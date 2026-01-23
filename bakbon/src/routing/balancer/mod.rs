@@ -49,7 +49,7 @@ mod tests {
         crate::{
             Address,
             Envelope,
-            MyResult,
+            Result,
             Reply,
         },
     };
@@ -62,7 +62,7 @@ mod tests {
 
         fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
 
-        fn process(&self, _message: Envelope) -> MyResult<Reply> { Ok(None) }
+        fn process(&self, _message: Envelope) -> Result<Reply> { Ok(None) }
     }
 
     #[test]
@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn balancer_select() -> MyResult<()> {
+    fn balancer_select() -> Result<()> {
         let src1 = "http://no-service-1.com";
         let src2 = "http://no-service-2.com";
         let src3 = "http://no-service-3.com";

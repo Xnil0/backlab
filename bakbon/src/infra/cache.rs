@@ -37,7 +37,7 @@ impl From<Store> for Cache {
 mod tests {
     use {
         super::*,
-        crate::{Address, MyResult},
+        crate::{Address, Result},
         bytes::Bytes,
     };
 
@@ -51,7 +51,7 @@ mod tests {
     }
 
     #[test]
-    fn new_cache_from_store() -> MyResult<()> {
+    fn new_cache_from_store() -> Result<()> {
         let src = Address::new(SRC)?;
         let payload = Bytes::default();
         let k = "service";
@@ -70,7 +70,7 @@ mod tests {
     }
 
     #[test]
-    fn store_into_cache() -> MyResult<()> {
+    fn store_into_cache() -> Result<()> {
         let src = Address::new(SRC)?;
         let payload = Bytes::default();
         let k = "msg";
@@ -89,7 +89,7 @@ mod tests {
     }
 
     #[test]
-    fn cache_store() -> MyResult<()> {
+    fn cache_store() -> Result<()> {
         let src = Address::new(SRC)?;
         let payload = Bytes::default();
         let msg = Envelope::new(src, DST, payload.clone());
@@ -117,7 +117,7 @@ mod tests {
     }
 
     #[test]
-    fn clear_cache() -> MyResult<()> {
+    fn clear_cache() -> Result<()> {
         let src = Address::new(SRC)?;
         let payload = Bytes::default();
         

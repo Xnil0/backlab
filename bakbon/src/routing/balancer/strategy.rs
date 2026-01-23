@@ -1,7 +1,7 @@
 use {
     crate::{
-        MyErr,
-        MyResult,
+        Error,
+        Result,
     },
     std::collections::HashMap,
 };
@@ -21,29 +21,29 @@ pub(super) enum Strategy {
 impl Strategy {
     pub fn new(value: &str) -> Self { value.into() }
 
-    pub fn index(&self) -> MyResult<usize> {
+    pub fn index(&self) -> Result<usize> {
         match self {
             Self::RoundRobin { index } | Self::Weighted { index, .. } => Ok(*index),
-            _ => Err(MyErr::WrongStrategy),
+            _ => Err(Error::WrongStrategy),
         }
     }
 
-    pub fn weights(&self) -> MyResult<&Weights> {
+    pub fn weights(&self) -> Result<&Weights> {
         match self {
             Self::Weighted {
                 weights, ..
             } => Ok(weights),
-            _ => Err(MyErr::WrongStrategy),
+            _ => Err(Error::WrongStrategy),
         }
     }
 
-    pub fn connection_count(&self) -> MyResult<&Connections> {
+    pub fn connection_count(&self) -> Result<&Connections> {
         match self {
             Self::LeastConnections {
                 connections,
                 ..
             } => Ok(connections),
-            _ => Err(MyErr::WrongStrategy),
+            _ => Err(Error::WrongStrategy),
         }
     }
 }

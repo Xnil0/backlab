@@ -1,7 +1,7 @@
 use {
     crate::{
         Envelope,
-        MyResult,
+        Result,
         Reply,
     },
     std::collections::HashMap,
@@ -10,5 +10,5 @@ use {
 pub type ProcMap = HashMap<String, Box<dyn Processor>>;
 
 pub trait Processor {
-    fn execute(&self, message: Envelope) -> MyResult<Reply>;
+    fn execute(&self, message: Envelope) -> Result<Reply>;
 }

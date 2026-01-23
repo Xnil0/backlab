@@ -5,8 +5,8 @@ use {
     },
     crate::{
         Envelope,
-        MyErr,
-        MyResult,
+        Error,
+        Result,
         Reply,
     },
 };
@@ -36,6 +36,38 @@ impl RouterBuilder {
     }
 }
 
+/// Routes envelopes to registered services with load balancing.
+///
+/// Router validates destination addresses and selects service instances
+/// using a configurable balancing strategy (round-robin,
+/// least-connections, etc.).
+///
+/// # Example s
+///
+/// ```rust
+/// pub struct NilService(Address); 
+/// 
+/// impl Service for NilService {
+///     fn address(&self) -> &Address { &self.address }
+///
+///     fn duplicate(&self) -> Box<dyn Service> {
+///         let address = self.address.clone();
+///         Box::new(Self(address))
+///     }
+///
+///     fn process(&self, message: Envelope) -> Result<Reply> {
+///         Ok(None)
+///     }
+/// }
+/// 
+/// let service = NilService(address);
+/// let mut router = Router::builder()
+///     .registry(registry)
+///     .balancer("random")
+///     .build();
+///
+/// let reply = router.route(envelope)?;
+/// ```
 pub struct Router {
     registry: Registry,
     balancer: Balancer,
@@ -44,11 +76,11 @@ pub struct Router {
 impl Router {
     pub fn builder() -> RouterBuilder { RouterBuilder::default() }
 
-    pub fn route(&mut self, msg: Envelope) -> MyResult<Reply> {
+    pub fn route(&mut self, msg: Envelope) -> Result<Reply> {
         let instances = self
             .registry
             .get(msg.destination())
-            .ok_or(MyErr::ServiceNotFound)?;
+            .ok_or(Error::ServiceNotFound)?;
 
         let service = self
             .balancer

@@ -3,7 +3,7 @@ mod builder;
 use {
     crate::{
         Envelope,
-        MyResult,
+        Result,
         core::{
             Address,
             Protocol,
@@ -22,7 +22,7 @@ pub struct Gateway {
 }
 
 impl Gateway {
-    pub fn builder(address: &str, port: u16) -> MyResult<GatewayBuilder> {
+    pub fn builder(address: &str, port: u16) -> Result<GatewayBuilder> {
         GatewayBuilder::new(address, port)
     }
 
@@ -59,7 +59,7 @@ mod tests {
     const URI: &str = "https://gateway.com";
 
     #[test]
-    fn build_gateway() -> MyResult<()> {
+    fn build_gateway() -> Result<()> {
         let port = 8080;
         let payload_size = 1024;
 
@@ -81,7 +81,7 @@ mod tests {
     }
 
     #[test]
-    fn gateway_handle() -> MyResult<()> {
+    fn gateway_handle() -> Result<()> {
         let path = "/api/v1/users";
         let payload = Bytes::from("Hello, World!");
 
