@@ -9,7 +9,6 @@
 //! ```rust
 //! use {
 //!     bakbon::*,
-//!     bytes::Bytes,
 //! };
 //!
 //! // Create an address.
@@ -17,7 +16,7 @@
 //! let destination = "grpc://service.com/echo";
 //!
 //! // Create a payload from the bytes crate.
-//! let payload = Bytes::from("Hello there");
+//! let payload = Payload::from("Hello there");
 //!
 //! // Create a message envelope.
 //! let message = Envelope::new(source, destination , payload);
@@ -57,6 +56,7 @@ pub use {
     message::{
         Envelope,
         Headers,
+        Payload,
         Reply,
     },
     queue::Queue,

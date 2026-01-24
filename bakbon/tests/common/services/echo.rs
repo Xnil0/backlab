@@ -27,7 +27,7 @@ pub struct EchoService {
 impl EchoService {
     pub fn new(address: Address) -> Self {
         let mut processors = ProcMap::new();
-        processors.insert(String::from("/echo"), Box::new(EchoProc));
+        processors.insert(String::from(""), Box::new(EchoProc));
 
         Self {
             address,

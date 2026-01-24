@@ -11,8 +11,8 @@ use {
 /// Parses and stores URI-like string with the format
 /// `scheme://authority/path?query#fragment` where:
 ///
-/// - `scheme` is backed by [`Protocol`](crate::Protocol) (for example
-///   `http`, `tcp`, `grpc`, `inproc`, etc.).
+/// - `scheme` is backed by [`Protocol`] (for example `http`, `tcp`,
+///   `grpc`, `inproc`, etc.).
 /// - `authority` is typically a host or logical service name.
 /// - `path` is used as authority to format the services address.
 ///

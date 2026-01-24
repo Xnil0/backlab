@@ -39,9 +39,9 @@ mod tests {
         super::*,
         crate::{
             Address,
+            Payload,
             Result,
         },
-        bytes::Bytes,
     };
 
     const SRC: &str = "http://source.com";
@@ -57,7 +57,7 @@ mod tests {
     fn new_cache_from_store() -> Result<()> {
         let src = Address::parse(SRC)?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
         let k = "service";
         let msg = Envelope::new(src, dst, payload.clone());
 
@@ -77,7 +77,7 @@ mod tests {
     fn store_into_cache() -> Result<()> {
         let src = Address::parse(SRC)?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
         let k = "msg";
         let msg = Envelope::new(src, dst, payload.clone());
 
@@ -97,7 +97,7 @@ mod tests {
     fn cache_store() -> Result<()> {
         let src = Address::parse(SRC)?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
         let msg = Envelope::new(src.clone(), dst.clone(), payload.clone());
 
         let k = "default";
@@ -126,7 +126,7 @@ mod tests {
     fn clear_cache() -> Result<()> {
         let src = Address::parse(SRC)?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
 
         let msg1 = Envelope::new(src.clone(), dst.clone(), payload.clone());
         let msg2 = Envelope::new(src.clone(), dst.clone(), payload.clone());

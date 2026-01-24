@@ -3,21 +3,34 @@ use {
         Headers,
         route::Route,
     },
-    crate::Address,
-    bytes::Bytes,
+    crate::{
+        Address,
+        Payload,
+    },
 };
 
-/// Envelope is a message wrapper that contains headers, route, and
-/// payload.
+/// Application-level message wrapper with headers, route and payload.
+///
+/// An `Envelope` is the core message unit exchanged between components
+/// such as [`Gateway`](crate::Gateway), [`Router`](crate::Router),
+/// [`Queue`](crate::Queue), and [`Service`](crate::Service). It bundles:
+///
+/// - [`Headers`] for metadata,
+/// - a Route with source and destination [`Address`]es,
+/// - a raw bytes [`Payload`]
 #[derive(Debug)]
 pub struct Envelope {
     headers: Headers,
     route:   Route,
-    payload: Bytes,
+    payload: Payload,
 }
 
 impl Envelope {
-    pub fn new(src: Address, dst: Address, payload: Bytes) -> Self {
+    /// Creates a new `Envelope` from source, destination, and payload.
+    ///
+    /// The payload can be empty (`Payload::new()`) to represent a message
+    /// without body.
+    pub fn new(src: Address, dst: Address, payload: Payload) -> Self {
         Self {
             headers: Headers::default(),
             route: Route::new(src, dst),
@@ -25,33 +38,61 @@ impl Envelope {
         }
     }
 
+    /// Add a header by value and return the updated `Envelope`.
+    ///
+    /// This is convenient for builder-style construction:
+    ///
+    /// ```ignore
+    /// let msg = Envelope::new(src, dst, payload)
+    ///     .header("content-type", "application/json")
+    ///     .header("encoding", "utf-8");
+    /// ```
     pub fn header(mut self, key: &str, value: &str) -> Self {
         self.headers
             .insert(key.to_string(), value.to_string());
         self
     }
 
+    /// Inserts or overrides a header in-place.
+    ///
+    /// To use when a mutable `Envelope` is already built.
+    ///
+    /// ```ignore
+    /// let msg = Envelope::new(src, dst, payload);
+    /// msg.add_header("content-type", "application/json");
+    /// msg.add_header("encoding", "utf-8");
+    /// ```
     pub fn add_header(&mut self, k: &str, v: &str) {
         self.headers
             .insert(k.to_string(), v.to_string());
     }
 
+    /// Returns the value of a header given the key, if it exists.
     pub fn get_header(&self, key: &str) -> Option<&str> {
         self.headers
             .get(key)
             .map(|v| v.as_str())
     }
 
-    pub fn into_reply(mut self, payload: Bytes) -> Self {
+    /// Converts this `Envelope` into a [`Reply`](crate::Reply) message
+    /// with a new payload.
+    ///
+    /// This swaps the source and the destination so that the reply is
+    /// routed back to the original sender, and replace the payload with
+    /// the provided bytes. Existed headers are preserved.
+    pub fn into_reply(mut self, payload: Payload) -> Self {
         self.route.swap_endpoints();
         self.payload = payload;
         self
     }
 
-    pub fn payload(&self) -> &Bytes { &self.payload }
+    /// Returns the reference to the raw [`Payload`] bytes.
+    pub fn payload(&self) -> &Payload { &self.payload }
 
+    /// Returns the reference to the source [`Address`] of the `Envelope`.
     pub fn source(&self) -> &Address { &self.route.source() }
 
+    /// Returns the reference to the `Envelope`'s destination [`Address`].
     pub fn destination(&self) -> &Address { &self.route.destination() }
 }
 
@@ -76,7 +117,7 @@ mod tests {
         assert!(dst.is_ok());
         let dst = dst.unwrap();
 
-        let payload = Bytes::from("random_payload");
+        let payload = Payload::from("random_payload");
         let msg = Envelope::new(src, dst, payload.clone());
 
         assert!(!msg.payload().is_empty());
@@ -93,7 +134,7 @@ mod tests {
         assert!(dst.is_ok());
         let dst = dst.unwrap();
 
-        let payload: Bytes = Bytes::new();
+        let payload = Payload::new();
         let msg = Envelope::new(src, dst, payload);
 
         assert!(msg.payload().is_empty());
@@ -109,7 +150,7 @@ mod tests {
         assert!(dst.is_ok());
         let dst = dst.unwrap();
 
-        let payload = Bytes::from("random_payload");
+        let payload = Payload::from("random_payload");
 
         let msg = Envelope::new(src, dst, payload)
             .header("content-type", "text/plain")
@@ -134,7 +175,7 @@ mod tests {
         assert!(dst.is_ok());
         let dst = dst.unwrap();
 
-        let payload = Bytes::from("random_payload");
+        let payload = Payload::from("random_payload");
 
         let msg = Envelope::new(src.clone(), dst.clone(), payload.clone())
             .header("content-type", "text/plain")

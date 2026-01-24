@@ -96,8 +96,10 @@ impl Queue {
 mod tests {
     use {
         super::*,
-        crate::Address,
-        bytes::Bytes,
+        crate::{
+            Address,
+            Payload,
+        },
     };
 
     const DST: &str = "tcp://queue.com";
@@ -140,7 +142,7 @@ mod tests {
         let addr2 = Address::parse("tcp://second.com")?;
         let addr3 = Address::parse("tcp://third.com")?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::from("Hello, Queue!");
+        let payload = Payload::from("Hello, Queue!");
 
         let msg1 = Envelope::new(addr1, dst.clone(), payload.clone());
         let msg2 = Envelope::new(addr2, dst.clone(), payload.clone());
@@ -176,7 +178,7 @@ mod tests {
         let ttl = Duration::from_secs(10);
         let src = Address::parse("http://service.com")?;
         let dst = Address::parse(DST)?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
 
         let queue = Queue::builder()
             .time_to_live(ttl)
@@ -204,12 +206,12 @@ mod tests {
         let msg1 = Envelope::new(
             addr1,
             dst.clone(),
-            Bytes::from("Hello, Queue!"),
+            Payload::from("Hello, Queue!"),
         );
 
         let addr2 = Address::parse("http://service2.com")?;
         let addr2_str = addr2.to_string();
-        let msg2 = Envelope::new(addr2, dst, Bytes::from("Hello, Queue!"));
+        let msg2 = Envelope::new(addr2, dst, Payload::from("Hello, Queue!"));
 
         let queue = Queue::default();
         queue.enqueue(msg1)?;
@@ -236,12 +238,12 @@ mod tests {
         let msg1 = Envelope::new(
             addr1,
             dst.clone(),
-            Bytes::from("Hello, Queue!"),
+            Payload::from("Hello, Queue!"),
         );
 
         let addr2 = Address::parse("http://service2.com")?;
         let addr2_str = addr2.to_string();
-        let msg2 = Envelope::new(addr2, dst, Bytes::from("Hello, Queue!"));
+        let msg2 = Envelope::new(addr2, dst, Payload::from("Hello, Queue!"));
 
         let queue = Queue::builder()
             .ordering("unordered")

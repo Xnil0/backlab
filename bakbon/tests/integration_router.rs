@@ -5,26 +5,23 @@ use {
     bakbon::{
         Address,
         Envelope,
+        Payload,
         Registry,
+        Result,
         Router,
         Service,
     },
-    bytes::Bytes,
 };
 
 #[test]
-fn router_to_service() {
+fn router_to_service() -> Result<()> {
     // Create Client Address.
     let client_uri = "http://client-service.com";
-    let client_addr = Address::parse(client_uri);
-    assert!(client_addr.is_ok());
-    let client_addr = client_addr.unwrap();
+    let client_addr = Address::parse(client_uri)?;
 
     // Create Echo Service.
-    let srv_uri = "http://service.com/echo";
-    let srv_addr = Address::parse(srv_uri);
-    assert!(srv_addr.is_ok());
-    let srv_addr = srv_addr.unwrap();
+    let srv_uri = "http://echo";
+    let srv_addr = Address::parse(srv_uri)?;
     let service = EchoService::new(srv_addr.clone());
     assert_eq!(service.address(), &srv_addr);
 
@@ -41,7 +38,7 @@ fn router_to_service() {
     assert_eq!(router.balancing_strategy(), "round_robin");
 
     // Create the Message.
-    let payload = Bytes::from("Hello...");
+    let payload = Payload::from("Hello...");
     let msg = Envelope::new(
         client_addr.clone(),
         srv_addr,
@@ -51,9 +48,7 @@ fn router_to_service() {
     .header("encoding", "utf-8");
 
     // Get Reply from Router.
-    let reply = router.route(msg);
-    assert!(reply.is_ok());
-    let reply = reply.unwrap();
+    let reply = router.route(msg)?;
     assert!(reply.is_some());
 
     // Check Reply Payload.
@@ -72,4 +67,6 @@ fn router_to_service() {
     let encoding = reply.get_header("encoding");
     assert!(encoding.is_some());
     assert_eq!(encoding.unwrap(), "utf-8");
+
+    Ok(())
 }

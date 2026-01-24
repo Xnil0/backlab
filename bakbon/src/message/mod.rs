@@ -16,10 +16,21 @@
 mod envelope;
 mod route;
 
-use std::collections::HashMap;
-
 pub use envelope::Envelope;
+use {
+    bytes::Bytes,
+    std::collections::HashMap,
+};
 
 /// Optional reply message returned by a [`Processor`](crate::Processor)
 pub type Reply = Option<Envelope>;
+
+/// Message metadata attached to an [`Envelope`](super::Envelope)
+///
+/// Headers are arbitrary key/value pairs. Some examples include:
+/// - `content-type`
+/// - `encoding`
+/// - `x-correlation-id`
 pub type Headers = HashMap<String, String>;
+
+pub type Payload = Bytes;

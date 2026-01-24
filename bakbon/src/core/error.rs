@@ -9,7 +9,7 @@ use {
 
 /// Result type for bakbon operations.
 ///
-/// Thin wrapper around `std::result::Result` with [`Error`](crate::Error)
+/// Thin wrapper around `std::result::Result` with [`Error`]
 /// as Error type.
 pub type Result<T> = result::Result<T, Error>;
 
@@ -54,8 +54,10 @@ impl fmt::Display for Error {
 mod tests {
     use {
         super::*,
-        crate::Address,
-        bytes::Bytes,
+        crate::{
+            Address,
+            message::Payload,
+        },
         std::{
             sync::{
                 Arc,
@@ -118,7 +120,7 @@ mod tests {
     fn queue_full_error() -> Result<()> {
         let src = Address::parse("http://source.com")?;
         let dst = Address::parse("http://destination.com")?;
-        let payload = Bytes::default();
+        let payload = Payload::default();
 
         let msg = Envelope::new(src.clone(), dst.clone(), payload.clone());
         let queue_full = Error::QueueFull(msg);

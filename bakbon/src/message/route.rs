@@ -1,5 +1,11 @@
 use crate::Address;
 
+/// Internal routing information between two endpoints.
+///
+/// `Route` tracks the source and destination [`Address`]
+/// of a message inside the system. It is used by
+/// [`Envelope`](super::Envelope) to represent where a message comes from
+/// and where it is going.
 #[derive(Debug)]
 pub(super) struct Route {
     source:      Address,
@@ -7,6 +13,7 @@ pub(super) struct Route {
 }
 
 impl Route {
+    /// Creates a new route between the given source and destination
     pub(super) fn new(src: Address, dst: Address) -> Self {
         Self {
             source:      src,
@@ -14,12 +21,21 @@ impl Route {
         }
     }
 
+    /// Swaps the source and destination addresses.
+    ///
+    /// This is typically used when building a [`Reply`](super::Reply) so
+    /// that the response travels back to the original back to the
+    /// original sender.
     pub(super) fn swap_endpoints(&mut self) {
         std::mem::swap(&mut self.source, &mut self.destination);
     }
 
+    /// Return the source [`Address`](crate::Address) reference of this
+    /// route.
     pub(super) fn source(&self) -> &Address { &self.source }
 
+    /// Return the destination [`Address`](crate::Address) reference of
+    /// this route.
     pub(super) fn destination(&self) -> &Address { &self.destination }
 }
 

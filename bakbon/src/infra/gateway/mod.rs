@@ -3,6 +3,7 @@ mod builder;
 use {
     crate::{
         Envelope,
+        Payload,
         Result,
         core::{
             Address,
@@ -10,7 +11,6 @@ use {
         },
     },
     builder::GatewayBuilder,
-    bytes::Bytes,
 };
 
 pub struct Gateway {
@@ -26,7 +26,7 @@ impl Gateway {
         GatewayBuilder::new(address, port)
     }
 
-    pub fn handle(&self, path: &str, payload: Bytes) -> Result<Envelope> {
+    pub fn handle(&self, path: &str, payload: Payload) -> Result<Envelope> {
         let dst_str = format!("{}:/{}", self.protocol, path);
         let destination = Address::parse(dst_str.as_str())?;
 
@@ -51,7 +51,10 @@ impl Gateway {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use {
+        super::*,
+        crate::Payload,
+    };
 
     const URI: &str = "https://gateway.com";
 
@@ -79,8 +82,8 @@ mod tests {
 
     #[test]
     fn gateway_handle() -> Result<()> {
-        let path = "/api/v1/users";
-        let payload = Bytes::from("Hello, World!");
+        let path = "/users";
+        let payload = Payload::from("Hello, World!");
 
         let gateway = Gateway::builder(URI, 8080)?
             .protocol("grpc")
@@ -90,10 +93,7 @@ mod tests {
 
         let msg = gateway.handle(path, payload.clone())?;
         assert_eq!(msg.source().to_string(), URI);
-        assert_eq!(
-            msg.destination().to_string(),
-            "grpc://gateway.com/api/v1/users"
-        );
+        assert_eq!(msg.destination().to_string(), "grpc://users");
         assert_eq!(msg.payload(), &payload);
         Ok(())
     }

@@ -7,7 +7,7 @@ use std::fmt;
 /// Transfer Protocol) `GRPC` (Google Remote Procedure Call), `MQTT`
 /// (Message Queuing Telemetry Transport), and more...
 ///
-/// Appears in [`Address`](crate::Address) as the `URI` scheme and in
+/// Appears in [`Address`](super::Address) as the `URI` scheme and in
 /// [`Gateway`](crate::Gateway) to define how external requests are turned
 /// into internal messages.
 ///
