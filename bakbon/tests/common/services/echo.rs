@@ -9,6 +9,7 @@ use bakbon::{
     Service,
 };
 
+#[derive(Debug)]
 pub struct EchoProc;
 
 impl Processor for EchoProc {
@@ -19,6 +20,7 @@ impl Processor for EchoProc {
     }
 }
 
+#[derive(Debug)]
 pub struct EchoService {
     address:    Address,
     processors: ProcMap,

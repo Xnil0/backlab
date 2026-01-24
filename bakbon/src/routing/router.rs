@@ -11,6 +11,11 @@ use {
     },
 };
 
+/// Builder for constructing a [`Router`] with a [`Registry`] and a
+/// [`Balancer`].
+///
+/// Used to set up a the [`Registry`] and balancing strategy before
+/// creating an immutable [`Router`].
 #[derive(Default)]
 pub struct RouterBuilder {
     registry: Registry,
@@ -18,16 +23,22 @@ pub struct RouterBuilder {
 }
 
 impl RouterBuilder {
+    /// Sets the service [`Registry`] used by the [`Router`].
     pub fn registry(mut self, registry: Registry) -> Self {
         self.registry = registry;
         self
     }
 
+    /// Sets the balancing strategy by name.
+    ///
+    /// See `Strategy` for supported values
+    /// such as `"round_robin"`, `"least_connections"`, or `"random"`.
     pub fn balancer(mut self, strategy: &str) -> Self {
         self.balancer = Balancer::new(strategy);
         self
     }
 
+    /// Finalizes the builder and returns a [`Router`].
     pub fn build(self) -> Router {
         Router {
             registry: self.registry,
@@ -36,34 +47,22 @@ impl RouterBuilder {
     }
 }
 
-/// Routes envelopes to registered services with load balancing.
+/// Routes [`Envelope`]s to registered [`Service`](crate::Service) with
+/// load balancing.
 ///
-/// Router validates destination addresses and selects service instances
-/// using a configurable balancing strategy (round-robin,
-/// least-connections, etc.).
+/// The `Router` looks up [`Service`](crate::Service) instances in the
+/// [`Registry`] based on the [`Envelope`] destination
+/// [`Address`](crate::Address) string representation, then delegates
+/// instance selection to the internal [`Balancer`] before calling
+/// [`Service::process()`](crate::Service::process()) on the chosen
+/// instance.
 ///
-/// # Example s
+/// # Examples
 ///
-/// ```rust
-/// pub struct NilService(Address);
-///
-/// impl Service for NilService {
-///     fn address(&self) -> &Address { &self.address }
-///
-///     fn duplicate(&self) -> Box<dyn Service> {
-///         let address = self.address.clone();
-///         Box::new(Self(address))
-///     }
-///
-///     fn process(&self, message: Envelope) -> Result<Reply> {
-///         Ok(None)
-///     }
-/// }
-///
-/// let service = NilService(address);
+/// ```ignore
 /// let mut router = Router::builder()
 ///     .registry(registry)
-///     .balancer("random")
+///     .balancer("least_connections")
 ///     .build();
 ///
 /// let reply = router.route(envelope)?;
@@ -74,8 +73,21 @@ pub struct Router {
 }
 
 impl Router {
+    /// Returns a new [`RouterBuilder`] with default configuration.
     pub fn builder() -> RouterBuilder { RouterBuilder::default() }
 
+    /// Routes a message to a registered [`Service`](crate::Service) and
+    /// returns its [`Reply`].
+    ///
+    /// This method:
+    /// 1. Looks up instances for `msg.destination()` in the [`Registry`].
+    /// 2. Uses the [`Balancer`] to select one instance.
+    /// 3. Calls [`Service::process()`](crate::Service::process()) on that
+    ///    instance.
+    ///
+    /// Returns [`Error::ServiceNotFound`] if no
+    /// [`Service`](crate::Service) is registered under the destination
+    /// [`Address`](crate::Address) string representation.
     pub fn route(&mut self, msg: Envelope) -> Result<Reply> {
         let instances = self
             .registry
@@ -88,13 +100,16 @@ impl Router {
 
         let service = self
             .balancer
-            .select(instances);
+            .select(instances)?;
 
         service.process(msg)
     }
 
+    /// Returns a reference to the underlying [`Service`](crate::Service)
+    /// [`Registry`].
     pub fn registry(&self) -> &Registry { &self.registry }
 
+    /// Returns the active balancing `Strategy` as a string.
     pub fn balancing_strategy(&self) -> &str { self.balancer.strategy() }
 }
 

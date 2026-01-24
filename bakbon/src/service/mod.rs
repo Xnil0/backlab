@@ -11,6 +11,7 @@ use {
         Result,
     },
     crate::Address,
+    std::fmt::Debug,
 };
 
 /// A service that processes envelopes and returns replies.
@@ -35,7 +36,7 @@ use {
 ///     }
 /// }
 /// ```
-pub trait Service {
+pub trait Service: Debug {
     fn address(&self) -> &Address;
     fn process(&self, message: Envelope) -> Result<Reply>;
     fn duplicate(&self) -> Box<dyn Service>;

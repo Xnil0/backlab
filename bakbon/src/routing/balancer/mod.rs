@@ -1,41 +1,70 @@
 mod strategy;
 
 use {
-    crate::Service,
+    crate::{
+        Error,
+        Result,
+        Service,
+    },
     strategy::Strategy,
 };
 
+/// Load-Balancer used internally by [`Router`](super::Router)
+///
+/// `Balancer` wraps a [`Strategy`] and selects a [`Service`] instance from
+/// a pool of registred instances for a given logical service. It is only
+/// responsible for instance selection; the [`Registry`](crate::Registry)
+/// handles service lookup by address.
 #[derive(Default)]
 pub(super) struct Balancer(Strategy);
 
 impl Balancer {
+    /// Creates a new balancer from a strategy name.
+    ///
+    /// The `strategy` string is converted into a [`Strategy`] struct using
+    /// its `From<&str>` implementation (e.g. "round_robin", "random")
     pub(super) fn new(strategy: &str) -> Self { Self(strategy.into()) }
 
-    pub fn strategy(&self) -> &str { self.0.as_ref() }
-
-    pub fn select<'a>(&'a mut self, instances: &'a [Box<dyn Service>]) -> &'a Box<dyn Service> {
+    /// Selects a service instance from the provided list.
+    ///
+    /// The selection logic depends on the configured strategy:
+    /// - `round_robin`: cycles through all instances in order.
+    /// - `weighted`, `least_connections`, `random`: placeholders for
+    ///   future implementations.
+    ///
+    /// Returns an [`Error::ServiceNotFound`] is the instances list is empty.
+    pub fn select<'a>(
+        &'a mut self,
+        instances: &'a [Box<dyn Service>],
+    ) -> Result<&'a Box<dyn Service>> {
+        if instances.is_empty() {
+            return Err(Error::ServiceNotFound);
+        }
         match &mut self.0 {
             Strategy::RoundRobin { index } => {
                 let service = &instances[*index % instances.len()];
                 *index += 1;
-                service
+                Ok(service)
             }
             Strategy::Weighted { index, .. } => {
                 // todo!("Implement the weighted logic");
                 let service = &instances[*index % instances.len()];
                 *index += 1;
-                service
+                Ok(service)
             }
             Strategy::LeastConnections { .. } => {
                 // todo!("Implement least connection logic");
-                &instances[0]
+                Ok(&instances[0])
             }
             Strategy::Random => {
                 // todo!("Implement random logic");
-                &instances[0]
+                Ok(&instances[0])
             }
         }
     }
+
+    /// Returns the balancing strategy as a string.
+    pub fn strategy(&self) -> &str { self.0.as_ref() }
 }
 
 //  +------------+
@@ -99,18 +128,32 @@ mod tests {
 
         let mut balancer = Balancer::default();
 
-        let selected = balancer.select(&instances);
+        let selected = balancer.select(&instances)?;
         assert_eq!(selected.address().to_string(), src1);
 
-        let selected = balancer.select(&instances);
+        let selected = balancer.select(&instances)?;
         assert_eq!(selected.address().to_string(), src2);
 
-        let selected = balancer.select(&instances);
+        let selected = balancer.select(&instances)?;
         assert_eq!(selected.address().to_string(), src3);
 
-        let selected = balancer.select(&instances);
+        let selected = balancer.select(&instances)?;
         assert_eq!(selected.address().to_string(), src1);
 
         Ok(())
+    }
+
+    #[test]
+    fn balancer_select_on_empty_list() {
+        let instances: Vec<Box<dyn Service>> = vec![];
+
+        let mut balancer = Balancer::default();
+
+        let result = balancer.select(&instances);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            Error::ServiceNotFound
+        ))
     }
 }

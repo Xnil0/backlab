@@ -6,21 +6,63 @@ use {
     std::collections::HashMap,
 };
 
+/// Per-service-instance weights used by the `Weighted` strategy.
+///
+/// `Keys` identify instances by name (like in the
+/// [`Registry`](crate::Registry)), and `values` represent relative
+/// weights.
 type Weights = HashMap<String, u32>;
+
+/// Per-service-instance connection count used by the `LeastConnections`
+/// strategy.
+///
+/// `Keys` identify instances by name (like in the
+/// [`Registry`](crate::Registry)), and `values` track the
+/// number of active connections.
 type Connections = HashMap<String, u32>;
 
+/// Load balancing strategies supported by the
+/// [`Balancer`](super::Balancer).
+///
+/// Each variant represents a different way to select a service instance
+/// from a pool of registred instances:
+///
+/// - `RoundRobin` cycles through instances in order.
+/// - `Weighted` selects instances based on configured weights.
+/// - `LeastConnections` prefers instances with fewer active connections.
+/// - `Random` chooses a random instance.
+///
+/// Only `RoundRobin` is fully implemented to this day; other strategies
+/// are placeholders for future development and currently behave like
+/// simple round-robin or fixed selection in the
+/// [`Balancer`](super::Balancer).
 #[derive(Debug, PartialEq, Eq)]
 pub(super) enum Strategy {
+    // Round-robin selection with internal index.
     RoundRobin { index: usize },
+
+    // Weighted selection with internal index and per-instance weight map.
     Weighted { index: usize, weights: Weights },
+
+    // Selection based on the number of active connections.
     LeastConnections { connections: Connections },
+
+    // Random instance selection.
     Random,
 }
 
 #[allow(unused)]
 impl Strategy {
+    /// Returns a new strategy instance based on its string representation.
+    ///
+    /// Equivalent to `Strategy::from(value)`.
     pub fn new(value: &str) -> Self { value.into() }
 
+    /// Returns the internal index for strategies that track one.
+    ///
+    /// Only valid for [`Strategy::RoundRobin`] and [`Strategy::Weighted`];
+    /// calling it on other strategies will return
+    /// [`Error::WrongStrategy`].
     pub fn index(&self) -> Result<usize> {
         match self {
             Self::RoundRobin { index } | Self::Weighted { index, .. } => Ok(*index),
@@ -28,6 +70,9 @@ impl Strategy {
         }
     }
 
+    /// Returns the weight map for [`Strategy::Weighted`].
+    ///
+    /// Calling it on another variant will return [`Error::WrongStrategy`].
     pub fn weights(&self) -> Result<&Weights> {
         match self {
             Self::Weighted {
@@ -37,6 +82,9 @@ impl Strategy {
         }
     }
 
+    /// Returns the connetion count map for [`Strategy::LeastConnections`].
+    ///
+    /// Calling it on another variant will return [`Error::WrongStrategy`].
     pub fn connection_count(&self) -> Result<&Connections> {
         match self {
             Self::LeastConnections {
@@ -49,10 +97,21 @@ impl Strategy {
 }
 
 impl Default for Strategy {
+    /// Returns the default strategy (`round_robin`).
     fn default() -> Self { Self::RoundRobin { index: 0 } }
 }
 
 impl From<&str> for Strategy {
+    /// Parse a strategy name into a [`Strategy`] value.
+    ///
+    /// Recognized names:
+    /// - "round_robin"
+    /// - "weighted"
+    /// - "least_connections"
+    /// - "random"
+    ///
+    /// Any unrecognized name falls back to the default strategy
+    /// (`round_robin`).
     fn from(value: &str) -> Self {
         match value {
             "round_robin" => Self::RoundRobin { index: 0 },
@@ -70,6 +129,10 @@ impl From<&str> for Strategy {
 }
 
 impl AsRef<str> for Strategy {
+    /// Returns the string representation of the strategy.
+    ///
+    /// Values match what [`From<&str>`] accept (e.g. "round_robin",
+    /// "weighted").
     fn as_ref(&self) -> &str {
         match self {
             Self::RoundRobin { .. } => "round_robin",
