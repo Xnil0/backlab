@@ -50,24 +50,30 @@ pub struct Address {
 }
 
 impl Address {
+    /// Parse a URI string into an Address.
     pub fn parse(uri: impl Into<String>) -> Result<Self> { uri.into().as_str().try_into() }
 
+    /// Get the scheme reference of the address.
     pub fn scheme(&self) -> &Protocol { &self.scheme }
 
+    /// Get the authority reference of the address.
     pub fn authority(&self) -> &str { &self.authority }
 
+    /// Get the path reference of the address.
     pub fn path(&self) -> &str {
         self.path
             .as_deref()
             .unwrap_or_default()
     }
 
+    /// Get the query reference of the address.
     pub fn query(&self) -> &str {
         self.query
             .as_deref()
             .unwrap_or_default()
     }
 
+    /// Get the fragment reference of the address.
     pub fn fragment(&self) -> &str {
         self.fragment
             .as_deref()

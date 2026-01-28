@@ -7,6 +7,7 @@ use bakbon::{
     Reply,
     Result,
     Service,
+    ServiceBox,
 };
 
 #[derive(Debug)]
@@ -41,7 +42,11 @@ impl EchoService {
 impl Service for EchoService {
     fn address(&self) -> &Address { &self.address }
 
-    fn duplicate(&self) -> Box<dyn Service> { Box::new(Self::new(self.address.clone())) }
+    fn duplicate(&self) -> ServiceBox {
+        let address = self.address.clone();
+        let dupe_service = Self::new(address);
+        Box::new(dupe_service)
+    }
 
     fn process(&self, message: Envelope) -> Result<Reply> {
         let path = self.address.path();

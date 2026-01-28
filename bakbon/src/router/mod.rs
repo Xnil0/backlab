@@ -1,51 +1,19 @@
-use {
-    super::{
-        Registry,
-        balancer::Balancer,
-    },
-    crate::{
-        Envelope,
-        Error,
-        Reply,
-        Result,
-    },
+//! Routing layer: registry of services plus a pluggable load balancer
+//! driving the [`Router`], which turns [`Envelope`] destinations into
+//! concrete [`Service`](crate::Service) instances.
+
+mod builder;
+
+pub use builder::RouterBuilder;
+
+use crate::{
+    Balancer,
+    Envelope,
+    Error,
+    Registry,
+    Reply,
+    Result,
 };
-
-/// Builder for constructing a [`Router`] with a [`Registry`] and a
-/// [`Balancer`].
-///
-/// Used to set up a the [`Registry`] and balancing strategy before
-/// creating an immutable [`Router`].
-#[derive(Default)]
-pub struct RouterBuilder {
-    registry: Registry,
-    balancer: Balancer,
-}
-
-impl RouterBuilder {
-    /// Sets the service [`Registry`] used by the [`Router`].
-    pub fn registry(mut self, registry: Registry) -> Self {
-        self.registry = registry;
-        self
-    }
-
-    /// Sets the balancing strategy by name.
-    ///
-    /// See `Strategy` for supported values
-    /// such as `"round_robin"`, `"least_connections"`, or `"random"`.
-    pub fn balancer(mut self, strategy: &str) -> Self {
-        self.balancer = Balancer::new(strategy);
-        self
-    }
-
-    /// Finalizes the builder and returns a [`Router`].
-    pub fn build(self) -> Router {
-        Router {
-            registry: self.registry,
-            balancer: self.balancer,
-        }
-    }
-}
 
 /// Routes [`Envelope`]s to registered [`Service`](crate::Service) with
 /// load balancing.
@@ -54,7 +22,7 @@ impl RouterBuilder {
 /// [`Registry`] based on the [`Envelope`] destination
 /// [`Address`](crate::Address) string representation, then delegates
 /// instance selection to the internal [`Balancer`] before calling
-/// [`Service::process()`](crate::Service::process()) on the chosen
+/// [`process()`](crate::Service::process) on the chosen
 /// instance.
 ///
 /// # Examples
@@ -76,14 +44,15 @@ impl Router {
     /// Returns a new [`RouterBuilder`] with default configuration.
     pub fn builder() -> RouterBuilder { RouterBuilder::default() }
 
-    /// Routes a message to a registered [`Service`](crate::Service) and
-    /// returns its [`Reply`].
+    /// Routes a [`message`](Envelope) to a registered
+    /// [`Service`](crate::Service) and returns its [`Reply`].
     ///
     /// This method:
-    /// 1. Looks up instances for `msg.destination()` in the [`Registry`].
+    /// 1. Looks up instances for
+    ///    [`msg.destination()`](Envelope::destination) in the
+    ///    [`Registry`].
     /// 2. Uses the [`Balancer`] to select one instance.
-    /// 3. Calls [`Service::process()`](crate::Service::process()) on that
-    ///    instance.
+    /// 3. Calls [`process()`](crate::Service::process) on that instance.
     ///
     /// Returns [`Error::ServiceNotFound`] if no
     /// [`Service`](crate::Service) is registered under the destination

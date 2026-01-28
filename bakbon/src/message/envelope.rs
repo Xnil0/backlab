@@ -9,14 +9,15 @@ use {
     },
 };
 
-/// Application-level message wrapper with headers, route and payload.
+/// Application-level message wrapper with [`Headers`],
+/// [`Route`] and [`Payload`].
 ///
 /// An `Envelope` is the core message unit exchanged between components
 /// such as [`Gateway`](crate::Gateway), [`Router`](crate::Router),
 /// [`Queue`](crate::Queue), and [`Service`](crate::Service). It bundles:
 ///
 /// - [`Headers`] for metadata,
-/// - a Route with source and destination [`Address`]es,
+/// - a [`Route`] with source and destination [`Address`]es,
 /// - a raw bytes [`Payload`]
 #[derive(Debug)]
 pub struct Envelope {
@@ -28,8 +29,8 @@ pub struct Envelope {
 impl Envelope {
     /// Creates a new `Envelope` from source, destination, and payload.
     ///
-    /// The payload can be empty (`Payload::new()`) to represent a message
-    /// without body.
+    /// The [`Payload`] can be empty [`Payload::new()`] to
+    /// represent a message without body.
     pub fn new(src: Address, dst: Address, payload: Payload) -> Self {
         Self {
             headers: Headers::default(),
@@ -75,11 +76,17 @@ impl Envelope {
     }
 
     /// Converts this `Envelope` into a [`Reply`](crate::Reply) message
-    /// with a new payload.
+    /// with a new [`Payload`].
     ///
-    /// This swaps the source and the destination so that the reply is
-    /// routed back to the original sender, and replace the payload with
-    /// the provided bytes. Existed headers are preserved.
+    /// This swaps the source and the destination so that the
+    /// [`Reply`](crate::Reply) is routed back to the original sender,
+    /// and replace the [`Payload`] with the provided bytes.
+    /// Existed [`Headers`] are preserved.
+    /// Typical usage is inside
+    /// [`Service::process()`](crate::Service::process) and/or
+    /// [`Processor::execute()`](crate::Processor::execute) before
+    /// returning.
+
     pub fn into_reply(mut self, payload: Payload) -> Self {
         self.route.swap_endpoints();
         self.payload = payload;

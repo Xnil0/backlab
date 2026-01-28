@@ -11,7 +11,7 @@
   - [Features](#features)
 - [Installation](#installation)
 - [File System](#file-system)
-- [Architecture](#architecture)
+- [Modules](#modules)
 - [Usage](#usage)
 - [Attribution](#attribution)
 
@@ -34,94 +34,102 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │
     ├── 📂 docs
     │       │
-    │       └── 🌄 ferris.svg
+    │       └── 🌄 ferris.svg
     │
     ├── 📂 src
     │       │
-    │       ├── 📂 core
+    │       ├── 📂 balancer
     │       │       │
-    │       │       ├── 📄 address.rs
-    │       │       ├── 📄 error.rs
-    │       │       ├── 📄 mod.rs
-    │       │       └── 📄 protocol.rs
+    │       │       ├── 📄 mod.rs
+    │       │       └── 📄 strategy.rs
     │       │
-    │       ├── 📂 infra
+    │       ├── 📂 core
     │       │       │
-    │       │       ├── 📂 gateway
+    │       │       ├── 📄 address.rs
+    │       │       ├── 📄 error.rs
+    │       │       ├── 📄 mod.rs
+    │       │       └── 📄 protocol.rs
+    │       │
+    │       ├── 📂 gateway
+    │       │       │
+    │       │       ├── 📄 builder.rs
+    │       │       └── 📄 mod.rs
+    │       │
+    │       ├── 📂 infra
+    │       │       │
+    │       │       ├── 📄 cache.rs
+    │       │       ├── 📄 middleware.rs
+    │       │       └── 📄 mod.rs
+    │       │
+    │       ├── 📂 message
+    │       │       │
+    │       │       ├── 📄 envelope.rs
+    │       │       ├── 📄 mod.rs
+    │       │       └── 📄 route.rs
+    │       │
+    │       ├── 📂 queue
+    │       │       │
+    │       │       ├── 📂 attributes
     │       │       │       │
-    │       │       │       ├── 📄 builder.rs
-    │       │       │       └── 📄 mod.rs
+    │       │       │       ├── 📄 delivery.rs
+    │       │       │       ├── 📄 durability.rs
+    │       │       │       ├── 📄 mod.rs
+    │       │       │       ├── 📄 ordering.rs
+    │       │       │       └── 📄 provider.rs
     │       │       │
-    │       │       ├── 📄 cache.rs
-    │       │       ├── 📄 middleware.rs
-    │       │       └── 📄 mod.rs
+    │       │       ├── 📄 builder.rs
+    │       │       └── 📄 mod.rs
     │       │
-    │       ├── 📂 message
+    │       ├── 📂 registry
     │       │       │
-    │       │       ├── 📄 envelope.rs
-    │       │       ├── 📄 mod.rs
-    │       │       └── 📄 route.rs
+    │       │       ├── 📄 builder.rs
+    │       │       └── 📄 mod.rs
     │       │
-    │       ├── 📂 queue
-    │       │       │
-    │       │       ├── 📂 attributes
-    │       │       │       │
-    │       │       │       ├── 📄 delivery.rs
-    │       │       │       ├── 📄 durability.rs
-    │       │       │       ├── 📄 mod.rs
-    │       │       │       ├── 📄 ordering.rs
-    │       │       │       └── 📄 provider.rs
-    │       │       │
-    │       │       ├── 📄 builder.rs
-    │       │       └── 📄 mod.rs
+    │       ├── 📂 router
+    │       │       │ 
+    │       │       ├── 📄 builder.rs
+    │       │       └── 📄 mod.rs
     │       │
-    │       ├── 📂 routing
+    │       ├── 📂 service
     │       │       │
-    │       │       ├── 📂 balancer
-    │       │       │       │
-    │       │       │       ├── 📄 mod.rs
-    │       │       │       └── 📄 strategy.rs
-    │       │       │
-    │       │       ├── 📄 mod.rs
-    │       │       ├── 📄 registry.rs
-    │       │       └── 📄 router.rs
+    │       │       ├── 📄 mod.rs
+    │       │       └── 📄 processor.rs
     │       │
-    │       ├── 📂 service
-    │       │       │
-    │       │       ├── 📄 mod.rs
-    │       │       └── 📄 processor.rs
-    │       │
-    │       └── 📄 lib.rs
+    │       └── 📄 lib.rs
     │
     ├── 📂 tests
     │       │
-    │       ├── 📂 common
+    │       ├── 📂 common
     │       │       │
-    │       │       ├── 📂 services
+    │       │       ├── 📂 services
     │       │       │       │
-    │       │       │       ├── 📄 echo.rs
-    │       │       │       └── 📄 mod.rs
+    │       │       │       ├── 📄 echo.rs
+    │       │       │       └── 📄 mod.rs
     │       │       │
-    │       │       └── 📄 mod.rs
+    │       │       └── 📄 mod.rs
     │       │
-    │       ├── 📄 integration_gateway.rs
-    │       ├── 📄 integration_queue.rs
-    │       └── 📄 integration_router.rs
+    │       ├── 📄 integration_gateway.rs
+    │       ├── 📄 integration_queue.rs
+    │       └── 📄 integration_router.rs
     │
     ├── ⚙️ Cargo.toml
     ├── 🔑 LICENSE
     └── 📖 README.md
 
-    15 directories, 37 files
+    16 directories, 38 files
 ```
 
-## Architecture
+## Modules
 
 BakBon provides:
-- **Message Model**: Envelope, Address, Protocol.
-- **Routing**: Router, Registry, Balancer.
-- **Transport**: Queue abstraction.
-- **Infrastructure**: Gateway, Cache, Middleware.
+- **Balancer**: Balancer.
+- **Core**: Address, Protocol, Error, Result.
+- **Gateway**: Gateway.
+- **Infra**: Cache, Middleware.
+- **Message**: Envelope, Route, Reply, Headers, Payload.
+- **Queue**: Queue.
+- **Registry**: Registry.
+- **Router**: Router.
 - **Service**: Service and Processor interfaces.
 
 ## Usage

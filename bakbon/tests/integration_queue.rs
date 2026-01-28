@@ -1,16 +1,6 @@
 use {
     crate::common::EchoService,
-    bakbon::{
-        Address,
-        Envelope,
-        Error,
-        Payload,
-        Queue,
-        Registry,
-        Result,
-        Router,
-        Service,
-    },
+    bakbon::prelude::*,
 };
 
 mod common;

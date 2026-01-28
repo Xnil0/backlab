@@ -27,14 +27,17 @@ type Connections = HashMap<String, u32>;
 /// Each variant represents a different way to select a service instance
 /// from a pool of registred instances:
 ///
-/// - `RoundRobin` cycles through instances in order.
-/// - `Weighted` selects instances based on configured weights.
-/// - `LeastConnections` prefers instances with fewer active connections.
-/// - `Random` chooses a random instance.
+/// - [`RoundRobin`](Strategy::RoundRobin) cycles through instances in
+///   order.
+/// - [`Weighted`](Strategy::Weighted) selects instances based on
+///   configured weights.
+/// - [`LeastConnections`](Strategy::LeastConnections) prefers instances
+///   with fewer active connections.
+/// - [`Random`](Strategy::Random) chooses a random instance.
 ///
-/// Only `RoundRobin` is fully implemented to this day; other strategies
-/// are placeholders for future development and currently behave like
-/// simple round-robin or fixed selection in the
+/// Only [`RoundRobin`](Strategy::RoundRobin) is fully implemented to this
+/// day; other strategies are placeholders for future development and
+/// currently behave like simple round-robin or fixed selection in the
 /// [`Balancer`](super::Balancer).
 #[derive(Debug, PartialEq, Eq)]
 pub(super) enum Strategy {

@@ -1,46 +1,20 @@
+mod builder;
+
 use {
-    super::Service,
     crate::{
         Error,
         Result,
+        ServiceMap,
+        ServiceVec,
     },
-    std::collections::HashMap,
+    builder::RegistryBuilder,
 };
-
-type Services = Vec<Box<dyn Service>>;
-type ServiceMap = HashMap<String, Services>;
-
-/// Builder for construction of registry of services.
-///
-/// `RegistryBuilder` let's you register one or more [`Service`] instances
-/// and then freeze the configuration into an immutable [`Registry`].
-#[derive(Default)]
-pub struct RegistryBuilder(ServiceMap);
-
-impl RegistryBuilder {
-    /// Registers a new service instance in the builder.
-    ///
-    /// [`Service`]s are grouped in their adrress string representation.
-    /// Multiple instances with the same address can be added later via
-    /// [`Registry::add_instance()`]
-    pub fn register(mut self, service: impl Service + 'static) -> Self {
-        let name = service.address().to_string();
-
-        self.0
-            .insert(name, vec![Box::new(service)]);
-
-        self
-    }
-
-    /// Finalizes the builder and returns an immutable [`Registry`].
-    pub fn build(self) -> Registry { Registry(self.0) }
-}
 
 /// Immutable registry of services keyed by address.
 ///
 /// The `Registry` stores one or more instances for each logical
-/// [`Service`]. It is used by [`Router`](crate::Router) to lookup
-/// candidate instances before delegating selection go
+/// [`Service`](crate::Service). It is used by [`Router`](crate::Router) to
+/// lookup candidate instances before delegating selection go
 /// [`Balancer`](super::balancer::Balancer).
 #[derive(Default)]
 pub struct Registry(pub(super) ServiceMap);
@@ -71,14 +45,14 @@ impl Registry {
 
     /// Returns a list of all instances registered for a given address
     /// string representation, if any.
-    pub fn get(&self, address: &str) -> Option<&Vec<Box<dyn Service>>> {
+    pub fn get(&self, address: &str) -> Option<&ServiceVec> {
         self.0
             .get(address)
             .map(|s| s.as_ref())
     }
 
-    /// Returns a list of all registered [`Service`] addresses string
-    /// representation.
+    /// Returns a list of all registered [`Service`]
+    /// [`Address`](crate::Address)es string representation.
     pub fn list(&self) -> Vec<&str> {
         self.0
             .keys()
@@ -87,22 +61,29 @@ impl Registry {
     }
 }
 
-// impl From<Vec<Box<dyn Service>>> for Registry {
-//     /// Builds a Registry from a flat list of service instances.
-//     ///
-//     /// Instances are grouped by their address string representation.
-//     fn from(services: Vec<Box<dyn Service>>) -> Self {
-//         let service_map = services
-//             .into_iter()
-//             .map(|service| {
-//                 let address = service.address().to_string();
-//                 (address, vec![service])
-//             })
-//             .collect::<ServiceMap>();
+impl From<ServiceVec> for Registry {
+    /// Builds a `Registry` from a flat list of [`Service`] instances.
+    ///
+    /// Instances are grouped by their [`Address`](crate::Address)] string
+    /// representation.
+    fn from(services: ServiceVec) -> Self {
+        let mut service_map: ServiceMap = ServiceMap::new();
 
-//         Self(service_map)
-//     }
-// }
+        for service in services {
+            let key = service
+                .address()
+                .authority()
+                .to_string();
+
+            service_map
+                .entry(key)
+                .or_insert_with(ServiceVec::new)
+                .push(service);
+        }
+
+        Self(service_map)
+    }
+}
 
 //  +------------+
 //  | UNIT TESTS |
@@ -116,18 +97,20 @@ mod tests {
             Address,
             Envelope,
             Reply,
+            Service,
+            ServiceBox,
         },
     };
 
     const ADDRESS: &str = "http://no-service.com";
 
     #[derive(Debug, Clone)]
-    struct NoService(Address);
+    struct NilService(Address);
 
-    impl Service for NoService {
+    impl Service for NilService {
         fn address(&self) -> &Address { &self.0 }
 
-        fn duplicate(&self) -> Box<dyn Service> { Box::new(self.clone()) }
+        fn duplicate(&self) -> ServiceBox { Box::new(self.clone()) }
 
         fn process(&self, _message: Envelope) -> Result<Reply> { Ok(None) }
     }
@@ -141,7 +124,7 @@ mod tests {
     #[test]
     fn build_registry() -> Result<()> {
         let address = Address::parse(ADDRESS)?;
-        let instance = NoService(address);
+        let instance = NilService(address);
         let registry = Registry::builder()
             .register(instance)
             .build();
@@ -156,7 +139,7 @@ mod tests {
     #[test]
     fn get_instances_from_registry() -> Result<()> {
         let address = Address::parse(ADDRESS)?;
-        let instance = NoService(address);
+        let instance = NilService(address);
         let registry = Registry::builder()
             .register(instance)
             .build();
@@ -170,7 +153,7 @@ mod tests {
     #[test]
     fn new_service_instance() -> Result<()> {
         let address = Address::parse(ADDRESS)?;
-        let instance = NoService(address);
+        let instance = NilService(address);
         let mut registry = Registry::builder()
             .register(instance)
             .build();
@@ -183,18 +166,38 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
-    // fn registry_from_vector_with_same_address() {
-    //     let address = Address::parse(ADDRESS).unwrap();
-    //     let instances = vec![
-    //         Box::new(NoService(address.clone())),
-    //         Box::new(NoService(address.clone())),
-    //         Box::new(NoService(address.clone())),
-    //     ];
-    //     let registry = Registry::from(instances);
+    #[test]
+    fn registry_from_vector_of_same_service() {
+        let address = Address::parse(ADDRESS).unwrap();
+        let service = NilService(address.clone());
+        let instances: ServiceVec = vec![
+            service.duplicate(),
+            service.duplicate(),
+            service.duplicate(),
+        ];
+        let registry = Registry::from(instances);
 
-    //     let instances = registry.get(address.authority());
-    //     assert!(instances.is_some());
-    //     assert_eq!(instances.unwrap().len(), 3);
-    // }
+        assert_eq!(registry.list().len(), 1);
+        assert_eq!(
+            registry
+                .get(address.authority())
+                .unwrap()
+                .len(),
+            3
+        );
+    }
+
+    #[test]
+    fn registry_from_vector_of_different_services() {
+        let address1 = Address::parse(ADDRESS).unwrap();
+        let address2 = Address::parse("http://example.com").unwrap();
+        let instances: ServiceVec = vec![
+            Box::new(NilService(address1.clone())),
+            Box::new(NilService(address2.clone())),
+            Box::new(NilService(address1.clone())),
+        ];
+        let registry = Registry::from(instances);
+
+        assert_eq!(registry.list().len(), 2);
+    }
 }

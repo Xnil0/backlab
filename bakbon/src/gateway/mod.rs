@@ -13,6 +13,38 @@ use {
     builder::GatewayBuilder,
 };
 
+/// `Gateway` is a network endpoint that can send messages to other
+/// [`Service`](crate::Service)s.
+///
+/// It provides methods to build a new `Gateway`, handle incoming messages,
+/// and retrieve information about the `Gateway`.
+///
+/// # Examples
+///
+/// ```rust
+/// use bakbon::*;
+///
+/// fn main() -> bakbon::Result<()> {
+///     let gateway = Gateway::builder("https://gateway.com", 8080)?
+///         .protocol("grpc")
+///         .max_payload_size(1024)
+///         .enable_compression()
+///         .build();
+///
+///     let payload = Payload::from("Hello, World!");
+///     let msg = gateway.handle("/api/v1/data", payload.clone())?;
+///     assert_eq!(msg.destination(), &Address::parse("grpc://api/v1/data")?);
+///     assert_eq!(msg.payload(), &payload);
+///
+///     assert_eq!(gateway.address(), &Address::parse("https://gateway.com")?);
+///     assert_eq!(gateway.port(), 8080);
+///     assert_eq!(gateway.protocol(), &Protocol::Grpc);
+///     assert_eq!(gateway.max_payload_size(), Some(1024));
+///     assert!(gateway.compression());
+///
+///     Ok(())
+/// }
+/// ```
 pub struct Gateway {
     address:          Address,
     port:             u16,

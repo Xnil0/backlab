@@ -1,3 +1,16 @@
+//! Module containing the load-balancing logic.
+//!
+//! This module provides the `Balancer` struct, which is used internally by
+//! [`Router`](super::Router) to select a [`Service`] instance from a pool
+//! of registered instances for a given logical [`Service`]. It wraps a
+//! [`Strategy`] and uses it to perform instance selection.
+//!
+//! Note: currently only the [`round_robin`](Strategy::RoundRobin) strategy
+//! has real logic. [`weighted`](Strategy::Weighted),
+//! [`least_connections`](Strategy::LeastConnections), and
+//! [`random`](Strategy::Random) behave as simple fallbacks and are not
+//! production-ready yet.
+
 mod strategy;
 
 use {
@@ -9,14 +22,21 @@ use {
     strategy::Strategy,
 };
 
-/// Load-Balancer used internally by [`Router`](super::Router)
+/// Load balancer.
 ///
 /// `Balancer` wraps a [`Strategy`] and selects a [`Service`] instance from
-/// a pool of registred instances for a given logical service. It is only
-/// responsible for instance selection; the [`Registry`](crate::Registry)
-/// handles service lookup by address.
+/// a pool of registred instances for a given logical [`Service`]. It is
+/// only responsible for instance selection; the
+/// [`Registry`](crate::Registry) handles [`Service`] lookup by
+/// [`Address`](crate::Address).
+///
+/// Used internally by [`Router`](super::Router)
+///
+/// Note: currently only the [`round_robin`](Strategy::RoundRobin)
+/// `Strategy` has real logic. `weighted`, `least_connections`, and
+/// `random` behave as simple fallbacks and are not production-ready yet.
 #[derive(Default)]
-pub(super) struct Balancer(Strategy);
+pub struct Balancer(Strategy);
 
 impl Balancer {
     /// Creates a new balancer from a strategy name.
@@ -32,7 +52,8 @@ impl Balancer {
     /// - `weighted`, `least_connections`, `random`: placeholders for
     ///   future implementations.
     ///
-    /// Returns an [`Error::ServiceNotFound`] is the instances list is empty.
+    /// Returns an [`Error::ServiceNotFound`] is the instances list is
+    /// empty.
     pub fn select<'a>(
         &'a mut self,
         instances: &'a [Box<dyn Service>],

@@ -11,14 +11,15 @@ use std::fmt;
 /// [`Gateway`](crate::Gateway) to define how external requests are turned
 /// into internal messages.
 ///
-/// The `Http` variant switches between http and https protocol via the
-/// `secure` flag and the `Custom` variant lets support and define any
-/// additional protocol.
+/// The [`Http`](Protocol::Http) variant switches between http and https
+/// protocol via the `secure` flag and the [`Custom`](Protocol::Custom)
+/// variant lets support and define any additional `Protocol`.
 ///
 /// ## Defaults
 ///
-/// The default `Protocol` variant is `InProc`, which is suitable for
-/// in-process testing and local implementations.
+/// The default `Protocol` variant is
+/// [`InProc`](Protocol::InProc), which is suitable for in-process
+/// testing and local implementations.
 ///
 /// # Examples
 ///
@@ -51,10 +52,12 @@ pub enum Protocol {
 }
 
 impl Default for Protocol {
+    /// Create a default protocol.
     fn default() -> Self { Self::InProc }
 }
 
 impl fmt::Display for Protocol {
+    /// Format the protocol as a string.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Tcp => write!(f, "tcp"),
@@ -71,6 +74,7 @@ impl fmt::Display for Protocol {
 }
 
 impl From<&str> for Protocol {
+    /// Create a protocol from a string.
     fn from(value: &str) -> Self {
         match value {
             "tcp" => Self::Tcp,
@@ -91,6 +95,7 @@ impl From<&str> for Protocol {
 }
 
 impl AsRef<str> for Protocol {
+    /// Return the protocol as a string.
     fn as_ref(&self) -> &str {
         match self {
             Self::Tcp => "tcp",

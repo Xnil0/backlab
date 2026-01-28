@@ -9,17 +9,28 @@ use {
 
 /// Result type for bakbon operations.
 ///
-/// Thin wrapper around `std::result::Result` with [`Error`]
+/// Thin wrapper around [`std::result::Result`] with [`Error`]
 /// as Error type.
 pub type Result<T> = result::Result<T, Error>;
 
 /// Errors that can occur in bakbon operations.
 ///
-/// Covers invalid message, invalid address, wrong balancing strategy,
-/// queue full, lock failed, service not found, and processor not found.
+/// Covers:
+/// - [`InvalidAddress`](Error::InvalidAddress):
+///   [`Address`](crate::Address) misconfiguration.
+/// - [`WrongStrategy`](Error::WrongStrategy): unsupported balancing
+///   `Strategy`.
+/// - [`QueueFull`](Error::QueueFull): [`Queue`](crate::Queue)cannot
+///   [`enqueue()`](crate::Queue::enqueue).
+/// - [`LockFailed`](Error::LockFailed): Cannot acquire
+///   [`enqueue()`](crate::Queue::enqueue) lock.
+/// - [`ServiceNotFound`](Error::ServiceNotFound): The requested
+///   [`Service`](crate::Service) was not found in the
+///   [`Registry`](crate::Registry).
+/// - [`ProcessorNotFound`](Error::ProcessorNotFound): The requested
+///   [`Processor`](crate::Processor) was not found in the .
 #[derive(Debug)]
 pub enum Error {
-    InvalidMessage,
     InvalidAddress,
     WrongStrategy,
     QueueFull(Envelope),
@@ -29,13 +40,14 @@ pub enum Error {
 }
 
 impl<T> From<PoisonError<T>> for Error {
+    /// Convert a `PoisonError` into an `Error`.
     fn from(e: PoisonError<T>) -> Self { Self::LockFailed(format!("Lock Poisoned: {e}")) }
 }
 
 impl fmt::Display for Error {
+    /// Format the error message.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::InvalidMessage => f.write_str("Invalid message."),
             Self::InvalidAddress => f.write_str("Invalid address."),
             Self::WrongStrategy => f.write_str("Wrong balancing strategy."),
             Self::QueueFull(msg) => write!(f, "Queue is full: {:?}", msg),
@@ -69,14 +81,12 @@ mod tests {
 
     #[test]
     fn error_display() {
-        let empty_msg_id = Error::InvalidMessage;
         let invalid_addr = Error::InvalidAddress;
         let wrong_strategy = Error::WrongStrategy;
         let lock_failed = Error::LockFailed("test".to_string());
         let service_not_found = Error::ServiceNotFound;
         let processor_not_found = Error::ProcessorNotFound;
 
-        assert_eq!(empty_msg_id.to_string(), "Invalid message.");
         assert_eq!(invalid_addr.to_string(), "Invalid address.");
         assert_eq!(
             wrong_strategy.to_string(),

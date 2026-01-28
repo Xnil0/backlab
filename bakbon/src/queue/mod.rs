@@ -1,3 +1,16 @@
+//! Transport `Queue` with pluggable semantics:
+//! `Provider`, `Ordering`, `Durability` and `Delivery` guarantees.
+//!
+//! # Examples
+//!
+//! ```
+//! use bakbon::*;
+//!
+//! let queue = Queue::builder()
+//!     .provider(QueueProvider::Memory)
+//!     .build();
+//! ```
+
 mod attributes;
 mod builder;
 
@@ -251,14 +264,14 @@ mod tests {
         queue.enqueue(msg1)?;
         queue.enqueue(msg2)?;
 
-        let msg = queue
-            .dequeue()?
-            .ok_or(Error::InvalidMessage)?;
+        let msg = queue.dequeue()?;
+        assert!(msg.is_some());
+        let msg = msg.unwrap();
         assert_eq!(msg.source().to_string(), addr2_str);
 
-        let msg = queue
-            .dequeue()?
-            .ok_or(Error::InvalidMessage)?;
+        let msg = queue.dequeue()?;
+        assert!(msg.is_some());
+        let msg = msg.unwrap();
         assert_eq!(msg.source().to_string(), addr1_str);
 
         Ok(())

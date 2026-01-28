@@ -2,8 +2,8 @@
 //!
 //! This module defines the core message types used inside the system:
 //!
-//! - [`Envelope`] represents an application-level message with payload and
-//!   routing  metadata.
+//! - [`Envelope`] represents an application-level message with `Payload`
+//!   and routing  metadata.
 //! - [Headers] is a map of string key/value pairs attached to an
 //!   [`Envelope`].
 //! - [Reply] models a optional reply message returned by
@@ -22,15 +22,16 @@ use {
     std::collections::HashMap,
 };
 
-/// Optional reply message returned by a [`Processor`](crate::Processor)
-pub type Reply = Option<Envelope>;
-
 /// Message metadata attached to an [`Envelope`](super::Envelope)
 ///
-/// Headers are arbitrary key/value pairs. Some examples include:
+/// `Headers` are arbitrary key/value pairs. Some examples include:
 /// - `content-type`
 /// - `encoding`
 /// - `x-correlation-id`
 pub type Headers = HashMap<String, String>;
 
+/// Optional reply message returned by a [`Processor`](crate::Processor)
+pub type Reply = Option<Envelope>;
+
+/// Message payload attached to an [`Envelope`](super::Envelope)
 pub type Payload = Bytes;

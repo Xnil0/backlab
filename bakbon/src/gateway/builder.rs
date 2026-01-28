@@ -7,6 +7,26 @@ use crate::{
     },
 };
 
+/// Builder for creating a new `Gateway`.
+///
+/// The `GatewayBuilder` provides a convenient way to create a new
+/// `Gateway` instance with custom configuration using methods chain.
+///
+/// # Examples
+///
+/// ```rust
+/// use bakbon::*;
+///
+/// let gw_builder = Gateway::builder("https://gateway.com", 8080);
+/// assert!(gw_builder.is_ok());
+/// let gw_builder = gw_builder.unwrap();
+///
+/// let gw_builder = gw_builder.protocol("https");
+///
+/// let gateway = gw_builder.build();
+/// assert_ne!(gateway.protocol(), &Protocol::default());
+/// assert_eq!(gateway.protocol(), &Protocol::Http { secure: true });
+/// ```
 pub struct GatewayBuilder {
     address:          Address,
     port:             u16,
