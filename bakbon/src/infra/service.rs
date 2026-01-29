@@ -1,16 +1,10 @@
-mod processor;
-
-pub use processor::{
-    ProcMap,
-    Processor,
-};
 use {
-    super::{
+    crate::{
+        Address,
         Envelope,
         Reply,
         Result,
     },
-    crate::Address,
     std::{
         collections::HashMap,
         fmt::Debug,
@@ -53,4 +47,6 @@ pub type ServiceBox = Box<dyn Service>;
 
 /// A vector of boxed services.
 pub type ServiceVec = Vec<ServiceBox>;
+
+/// A map of service vectors indexed by service name.
 pub type ServiceMap = HashMap<String, ServiceVec>;

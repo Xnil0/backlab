@@ -64,27 +64,33 @@
 //!     assert!(reply.is_none());
 //! ```
 mod balancer;
+mod cache;
 mod core;
-mod gateway;
 mod infra;
 mod message;
 mod queue;
 mod registry;
 mod router;
-mod service;
 
 pub use {
     balancer::Balancer,
+    cache::Cache,
     core::{
         Address,
         Error,
         Protocol,
         Result,
     },
-    gateway::Gateway,
     infra::{
-        Cache,
+        Gateway,
         Middleware,
+        ProcMap,
+        Processor,
+        Service,
+        ServiceBox,
+        ServiceMap,
+        ServiceVec,
+        Storage,
     },
     message::{
         Envelope,
@@ -95,14 +101,6 @@ pub use {
     queue::Queue,
     registry::Registry,
     router::Router,
-    service::{
-        ProcMap,
-        Processor,
-        Service,
-        ServiceBox,
-        ServiceMap,
-        ServiceVec,
-    },
 };
 
 pub mod prelude {
@@ -128,5 +126,6 @@ pub mod prelude {
         ServiceBox,
         ServiceMap,
         ServiceVec,
+        Storage,
     };
 }

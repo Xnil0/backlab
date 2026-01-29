@@ -1,7 +1,10 @@
 mod common;
 
 use {
-    crate::common::EchoService,
+    crate::common::{
+        ApiGateway,
+        EchoService,
+    },
     bakbon::prelude::*,
 };
 
@@ -31,11 +34,8 @@ fn gateway_to_router_to_service() -> Result<()> {
 
     // Build Gateway.
     let gw_url = "https://service.com";
-    let gw_port = 8080;
 
-    let gateway = Gateway::builder(gw_url, gw_port)?
-        .protocol("inproc")
-        .build();
+    let gateway = ApiGateway::new(gw_url, "inproc")?;
     assert_eq!(gateway.protocol(), &Protocol::InProc);
 
     let msg = gateway.handle(path, payload.clone())?;

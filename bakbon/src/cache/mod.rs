@@ -1,5 +1,8 @@
 use {
-    crate::Envelope,
+    crate::{
+        Envelope,
+        Storage,
+    },
     std::collections::HashMap,
 };
 
@@ -20,6 +23,11 @@ impl Cache {
 
     pub fn clear(&mut self) { self.store.clear(); }
 }
+
+// impl Storage for Cache {
+//     type Key = String;
+//     type Value = Envelope;
+// }
 
 impl From<Store> for Cache {
     fn from(value: Store) -> Self {

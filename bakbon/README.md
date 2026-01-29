@@ -43,6 +43,10 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │       ├── 📄 mod.rs
     │       │       └── 📄 strategy.rs
     │       │
+    │       ├── 📂 cache.rs
+    │       │       │
+    │       │       └── 📄 mod.rs
+    |       |
     │       ├── 📂 core
     │       │       │
     │       │       ├── 📄 address.rs
@@ -50,16 +54,12 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │       ├── 📄 mod.rs
     │       │       └── 📄 protocol.rs
     │       │
-    │       ├── 📂 gateway
-    │       │       │
-    │       │       ├── 📄 builder.rs
-    │       │       └── 📄 mod.rs
-    │       │
     │       ├── 📂 infra
     │       │       │
-    │       │       ├── 📄 cache.rs
+    │       │       ├── 📄 gateway.rs
     │       │       ├── 📄 middleware.rs
-    │       │       └── 📄 mod.rs
+    │       │       ├── 📄 mod.rs
+    │       │       └── 📄 storage.rs
     │       │
     │       ├── 📂 message
     │       │       │

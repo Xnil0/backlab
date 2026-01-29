@@ -1,3 +1,7 @@
+mod gateway;
 mod services;
 
-pub use services::EchoService;
+pub use {
+    gateway::ApiGateway,
+    services::EchoService,
+};
