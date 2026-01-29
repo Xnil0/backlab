@@ -1,7 +1,7 @@
 <h1 align=center>
     BakBon
     <br>
-    <img alt="Ferris" src="./docs/ferris.svg">
+    <img alt="Ferris" src="../docs/ferris.svg">
 </h1>
 
 ## Table of Contents
@@ -169,4 +169,4 @@ assert!(reply.is_ok());
 
 If you use this project in your application, service, or research, please include the following credit:
 
-> Based on **BakBon** by Xn!l0 (<https://gg
+> Based on **Bakbon** by Xn!l0 (https://github.com/Xnil0/backlab), licensed under the MIT License.
