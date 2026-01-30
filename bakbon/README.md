@@ -17,7 +17,7 @@
 
 ## Overview
 
-BakBon is an lightweight infrastructure framework created to help configure, compose and build any type of message-driven distributed systems whether it is microservices, blockchain insfrastructure IoT networks, by providing core infastructure building blocks such as gateways, balancers, queues, caching systems.
+BakBon is an lightweight infrastructure microkernel library in Rust created to help configure, compose and build any type of message-driven distributed system whether it is microservices, blockchain insfrastructure IoT networks, by providing generic building blocks such as routers, gateways, balancers, queues, caching systems.
 
 ### Features
 
