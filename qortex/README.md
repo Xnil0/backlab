@@ -15,6 +15,8 @@
 
 ## Overview
 
+ As a multiservice distributed system built on top of BakBon, Qortex will provide a unified interface for interacting with various services such as ai gateway, payment service, and sensors etc.
+
 ## Installation
 
 ## File System

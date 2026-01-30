@@ -5,16 +5,20 @@
 </h1>
 
 ## Table of Contents
+
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-- [Bakbon](#bakbon)
+- [BakBon](#bakbon)
 - [Qortex](#qortex)
 
 ## Overview
+
 Backlab is a project containing two(2) major crates:
 
-## [Bakbon](./bakbon/README.md)
+## [BakBon](./bakbon/README.md)
 
-Bakbon is a infrastructure microkernel created to help configure and compose different infrastructure components/services such as gateways, load balancers, caching systems etc., from the core communication unit: the Message. Which allow to customize the whole process.
+BakBon is a infrastructure microkernel created to help configure and compose different infrastructure components/services such as gateways, load balancers, caching systems etc., from the core communication unit: the Message. Which allow to customize the whole process.
 
 ## [Qortex](./qortex/README.md)
+
+Qortex will be a multiservice distributed system built on top of BakBon

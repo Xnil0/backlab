@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    unimplemented!("Qortex will be built on top of BakBon as a multiservice distributed system");
 }
