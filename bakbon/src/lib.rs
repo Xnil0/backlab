@@ -74,6 +74,7 @@ mod router;
 
 pub use {
     balancer::Balancer,
+    bytes,
     cache::Cache,
     core::{
         Address,
