@@ -28,6 +28,10 @@ BakBon is an lightweight infrastructure microkernel library in Rust created to h
 
 ## Installation
 
+```
+cargo add bakbon
+```
+
 ## File System
 ```
 📂 bakbon
@@ -119,14 +123,13 @@ BakBon is an lightweight infrastructure microkernel library in Rust created to h
 
 BakBon provides:
 - **Balancer**: Balancer.
+- **Cache**: Cache.
 - **Core**: Address, Protocol, Error, Result.
-- **Gateway**: Gateway.
-- **Infra**: Cache, Middleware.
+- **Infra**: Gateway, Middleware, Processor, Service and Storage traits.
 - **Message**: Envelope, Route, Reply, Headers, Payload.
 - **Queue**: Queue.
 - **Registry**: Registry.
 - **Router**: Router.
-- **Service**: Service and Processor interfaces.
 
 ## Usage
 
@@ -153,7 +156,7 @@ let mut router = Router::builder()
     .build();
 
 // Create a message.
-let message = Envelope::new(client_addr, url, bytes);
+let message = Envelope::new(client_addr, srv_addr, payload);
 
 // Route the message to the appropriate service
 let reply: Result<Reply> = router.route(message);
