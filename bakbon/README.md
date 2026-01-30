@@ -32,10 +32,6 @@ BakBon is an lightweight infrastructure framework created to help configure, com
 ```
 📂 bakbon
     │
-    ├── 📂 docs
-    │       │
-    │       └── 🌄 ferris.svg
-    │
     ├── 📂 src
     │       │
     │       ├── 📂 balancer
@@ -45,8 +41,10 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │
     │       ├── 📂 cache.rs
     │       │       │
+    │       │       ├── 📄 builder.rs
+    │       │       ├── 📄 eviction.rs
     │       │       └── 📄 mod.rs
-    |       |
+    │       │
     │       ├── 📂 core
     │       │       │
     │       │       ├── 📄 address.rs
@@ -59,6 +57,8 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │       ├── 📄 gateway.rs
     │       │       ├── 📄 middleware.rs
     │       │       ├── 📄 mod.rs
+    │       │       ├── 📄 processor.rs
+    │       │       ├── 📄 service.rs
     │       │       └── 📄 storage.rs
     │       │
     │       ├── 📂 message
@@ -90,11 +90,6 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │       ├── 📄 builder.rs
     │       │       └── 📄 mod.rs
     │       │
-    │       ├── 📂 service
-    │       │       │
-    │       │       ├── 📄 mod.rs
-    │       │       └── 📄 processor.rs
-    │       │
     │       └── 📄 lib.rs
     │
     ├── 📂 tests
@@ -106,6 +101,7 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     │       │       │       ├── 📄 echo.rs
     │       │       │       └── 📄 mod.rs
     │       │       │
+    │       │       ├── 📄 gateway.rs
     │       │       └── 📄 mod.rs
     │       │
     │       ├── 📄 integration_gateway.rs
@@ -116,7 +112,7 @@ BakBon is an lightweight infrastructure framework created to help configure, com
     ├── 🔑 LICENSE
     └── 📖 README.md
 
-    16 directories, 38 files
+    14 directories, 40 files
 ```
 
 ## Modules

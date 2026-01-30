@@ -15,7 +15,7 @@ use {
 };
 
 #[derive(Default)]
-pub struct QueueBuilder {
+pub struct Builder {
     provider:           QueueProvider,
     buffer:             Mutex<VecDeque<Envelope>>,
     capacity:           Option<usize>,
@@ -25,7 +25,7 @@ pub struct QueueBuilder {
     delivery_guarantee: DeliveryGuarantee,
 }
 
-impl QueueBuilder {
+impl Builder {
     pub fn provider(mut self, provider: &str) -> Self {
         self.provider = QueueProvider::from(provider);
         self
@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn build_queue_with_provider() {
         let provider_str = "redis";
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .provider(provider_str)
             .build();
         assert_eq!(queue.provider(), provider_str);
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn build_queue_with_capacity() {
         let capacity = 100;
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .capacity(capacity)
             .build();
         assert_eq!(queue.capacity(), Some(capacity));
@@ -98,7 +98,7 @@ mod tests {
     #[test]
     fn build_queue_with_ttl() {
         let ttl = Duration::from_secs(60);
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .time_to_live(ttl)
             .build();
         assert_eq!(queue.time_to_live(), Some(ttl));
@@ -107,7 +107,7 @@ mod tests {
     #[test]
     fn build_queue_with_ordering() {
         let ordering_str = "fifo";
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .ordering(ordering_str)
             .build();
         assert_eq!(queue.ordering(), ordering_str);
@@ -116,7 +116,7 @@ mod tests {
     #[test]
     fn build_queue_with_durability() {
         let durability_str = "replicated";
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .durability(durability_str)
             .build();
         assert_eq!(queue.durability(), durability_str);
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn build_queue_with_delivery_guarantee() {
         let guarantee_str = "at_least_once";
-        let queue = QueueBuilder::default()
+        let queue = Builder::default()
             .delivery_guarantee(guarantee_str)
             .build();
         assert_eq!(queue.delivery_guarantee(), guarantee_str);

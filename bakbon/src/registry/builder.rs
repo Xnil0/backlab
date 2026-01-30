@@ -8,12 +8,12 @@ use {
 
 /// Builder for construction of registry of services.
 ///
-/// `RegistryBuilder` let's you register one or more [`Service`] instances
+/// `Builder` let's you register one or more [`Service`] instances
 /// and then freeze the configuration into an immutable [`Registry`].
 #[derive(Default)]
-pub struct RegistryBuilder(ServiceMap);
+pub struct Builder(ServiceMap);
 
-impl RegistryBuilder {
+impl Builder {
     /// Registers a new service instance in the builder.
     ///
     /// [`Service`]s are grouped in their [`Adrress`](crate::Address)
@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn default_registry_builder() {
-        let builder = RegistryBuilder::default();
+        let builder = Builder::default();
         assert!(builder.0.is_empty());
     }
 

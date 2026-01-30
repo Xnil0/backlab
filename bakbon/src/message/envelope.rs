@@ -43,8 +43,13 @@ impl Envelope {
     ///
     /// This is convenient for builder-style construction:
     ///
-    /// ```ignore
-    /// let msg = Envelope::new(src, dst, payload)
+    /// ```rust
+    /// use bakbon::*;
+    /// 
+    /// let (src, dst) = (Address::parse("http://source.com"), Address::parse("http://destination.com"));
+    /// assert!(src.is_ok() && dst.is_ok());
+    /// 
+    /// let msg = Envelope::new(src.unwrap(), dst.unwrap(), Payload::default())
     ///     .header("content-type", "application/json")
     ///     .header("encoding", "utf-8");
     /// ```
@@ -58,8 +63,13 @@ impl Envelope {
     ///
     /// To use when a mutable `Envelope` is already built.
     ///
-    /// ```ignore
-    /// let msg = Envelope::new(src, dst, payload);
+    /// ```rust
+    /// use bakbon::*;
+    /// 
+    /// let (src, dst) = (Address::parse("http://source.com"), Address::parse("http://destination.com"));
+    /// assert!(src.is_ok() && dst.is_ok());
+    /// 
+    /// let mut msg = Envelope::new(src.unwrap(), dst.unwrap(), Payload::default());
     /// msg.add_header("content-type", "application/json");
     /// msg.add_header("encoding", "utf-8");
     /// ```

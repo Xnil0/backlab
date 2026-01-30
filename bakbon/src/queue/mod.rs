@@ -7,7 +7,7 @@
 //! use bakbon::*;
 //!
 //! let queue = Queue::builder()
-//!     .provider(QueueProvider::Memory)
+//!     .provider("kafka")
 //!     .build();
 //! ```
 
@@ -26,7 +26,7 @@ use {
         Ordering,
         QueueProvider,
     },
-    builder::QueueBuilder,
+    builder::Builder,
     std::{
         collections::VecDeque,
         sync::Mutex,
@@ -46,7 +46,7 @@ pub struct Queue {
 }
 
 impl Queue {
-    pub fn builder() -> QueueBuilder { QueueBuilder::default() }
+    pub fn builder() -> Builder { Builder::default() }
 
     pub fn enqueue(&self, mut msg: Envelope) -> Result<()> {
         let mut buffer = self.buffer.lock()?;

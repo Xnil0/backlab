@@ -4,7 +4,7 @@
 
 mod builder;
 
-pub use builder::RouterBuilder;
+pub use builder::Builder;
 
 use crate::{
     Balancer,
@@ -41,8 +41,8 @@ pub struct Router {
 }
 
 impl Router {
-    /// Returns a new [`RouterBuilder`] with default configuration.
-    pub fn builder() -> RouterBuilder { RouterBuilder::default() }
+    /// Returns a new [`Builder`] with default configuration.
+    pub fn builder() -> Builder { Builder::default() }
 
     /// Routes a [`message`](Envelope) to a registered
     /// [`Service`](crate::Service) and returns its [`Reply`].

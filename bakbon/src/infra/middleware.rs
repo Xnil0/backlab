@@ -4,8 +4,11 @@ use crate::{
 };
 
 /// Example:
-/// ```ignore
+/// ```rust
+/// use bakbon::prelude::*;
+/// 
 /// struct LogMiddleware;
+/// 
 /// impl Middleware for LogMiddleware {
 ///     fn intercept(&self, msg: Envelope) -> Result<Envelope> {
 ///         println!("incoming: {:?}", msg);

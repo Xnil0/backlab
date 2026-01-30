@@ -10,12 +10,12 @@ use crate::{
 /// Used to set up a the [`Registry`] and balancing strategy before
 /// creating an immutable [`Router`].
 #[derive(Default)]
-pub struct RouterBuilder {
+pub struct Builder {
     registry: Registry,
     balancer: Balancer,
 }
 
-impl RouterBuilder {
+impl Builder {
     /// Sets the service [`Registry`] used by the [`Router`].
     pub fn registry(mut self, registry: Registry) -> Self {
         self.registry = registry;
@@ -46,14 +46,11 @@ impl RouterBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        Router,
-        router::RouterBuilder,
-    };
+    use super::*;
 
     #[test]
     fn default_router_builder() {
-        let builder = RouterBuilder::default();
+        let builder = Builder::default();
         assert!(builder.registry.0.is_empty());
         assert_eq!(builder.balancer.strategy(), "round_robin");
     }

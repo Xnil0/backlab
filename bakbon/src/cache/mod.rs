@@ -1,8 +1,10 @@
+mod builder;
+mod eviction;
+
+pub use eviction::Eviction;
 use {
-    crate::{
-        Envelope,
-        Storage,
-    },
+    crate::Envelope,
+    builder::Builder,
     std::collections::HashMap,
 };
 
@@ -10,10 +12,13 @@ type Store = HashMap<String, Envelope>;
 
 #[derive(Default)]
 pub struct Cache {
-    store: Store,
+    store:    Store,
+    eviction: Eviction,
 }
 
 impl Cache {
+    pub fn builder() -> Builder { Builder::default() }
+
     pub fn get(&self, k: &str) -> Option<&Envelope> { self.store.get(k) }
 
     pub fn set(&mut self, k: &str, v: Envelope) {
@@ -22,19 +27,8 @@ impl Cache {
     }
 
     pub fn clear(&mut self) { self.store.clear(); }
-}
 
-// impl Storage for Cache {
-//     type Key = String;
-//     type Value = Envelope;
-// }
-
-impl From<Store> for Cache {
-    fn from(value: Store) -> Self {
-        Self {
-            store: value,
-        }
-    }
+    pub fn eviction(&self) -> Eviction { self.eviction }
 }
 
 //  +------------+
@@ -51,7 +45,6 @@ mod tests {
             Result,
         },
     };
-
     const SRC: &str = "http://source.com";
     const DST: &str = "http://destination.com";
 
@@ -59,46 +52,6 @@ mod tests {
     fn default_cache() {
         let cache = Cache::default();
         assert!(cache.store.is_empty());
-    }
-
-    #[test]
-    fn new_cache_from_store() -> Result<()> {
-        let src = Address::parse(SRC)?;
-        let dst = Address::parse(DST)?;
-        let payload = Payload::default();
-        let k = "service";
-        let msg = Envelope::new(src, dst, payload.clone());
-
-        let mut store = Store::default();
-        store.insert(k.to_string(), msg);
-
-        let cache = Cache::from(store);
-        assert!(!cache.store.is_empty());
-
-        let msg = cache.get(k);
-        assert!(msg.is_some());
-        assert_eq!(msg.unwrap().payload(), &payload);
-        Ok(())
-    }
-
-    #[test]
-    fn store_into_cache() -> Result<()> {
-        let src = Address::parse(SRC)?;
-        let dst = Address::parse(DST)?;
-        let payload = Payload::default();
-        let k = "msg";
-        let msg = Envelope::new(src, dst, payload.clone());
-
-        let mut store = Store::default();
-        store.insert(k.to_string(), msg);
-
-        let cache: Cache = store.into();
-        assert!(!cache.store.is_empty());
-
-        let msg = cache.get(k);
-        assert!(msg.is_some());
-        assert_eq!(msg.unwrap().payload(), &payload);
-        Ok(())
     }
 
     #[test]
@@ -142,17 +95,13 @@ mod tests {
         let msg4 = Envelope::new(src.clone(), dst.clone(), payload.clone());
         let msg5 = Envelope::new(src.clone(), dst.clone(), payload.clone());
 
-        let store: Store = [
-            ("msg1".to_string(), msg1),
-            ("msg2".to_string(), msg2),
-            ("msg3".to_string(), msg3),
-            ("msg4".to_string(), msg4),
-            ("msg5".to_string(), msg5),
-        ]
-        .into_iter()
-        .collect();
+        let mut cache = Cache::default();
+        cache.set("msg1", msg1);
+        cache.set("msg2", msg2);
+        cache.set("msg3", msg3);
+        cache.set("msg4", msg4);
+        cache.set("msg5", msg5);
 
-        let mut cache = Cache::from(store);
         assert_eq!(cache.store.len(), 5);
 
         cache.clear();

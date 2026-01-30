@@ -7,7 +7,7 @@ use {
         ServiceMap,
         ServiceVec,
     },
-    builder::RegistryBuilder,
+    builder::Builder,
 };
 
 /// Immutable registry of services keyed by address.
@@ -20,8 +20,8 @@ use {
 pub struct Registry(pub(super) ServiceMap);
 
 impl Registry {
-    /// Returns an empty [`RegistryBuilder`].
-    pub fn builder() -> RegistryBuilder { RegistryBuilder::default() }
+    /// Returns an empty [`Builder`].
+    pub fn builder() -> Builder { Builder::default() }
 
     /// Adds a new instance for an existing service address.
     ///
