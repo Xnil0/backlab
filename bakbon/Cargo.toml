@@ -2,7 +2,7 @@
 name = "bakbon"
 version = "0.1.1"
 edition = "2024"
-description = "On top of BakBon, the next step (Qortex) will be a multi‑service distributed system that uses BakBon’s microkernel to compose AI, payment, storage and other services into a customizable distributed architecture."
+description = "BakBon is an infrastructure microkernel library in Rust that provides generic building blocks (Router, Registry, Balancer, Queue, Gateway, Cache, Middleware, Service/Processor) for message‑driven distributed systems."
 license = "MIT"
 repository = "https://github.com/Xnil0/backlab.git"
 homepage = "https://github.com/Xnil0/backlab"
