@@ -105,7 +105,7 @@ impl Default for Strategy {
 }
 
 impl From<&str> for Strategy {
-    /// Parse a strategy name into a [`Strategy`] value.
+    /// Parse a strategy name into a `Strategy` value.
     ///
     /// Recognized names:
     /// - "round_robin"

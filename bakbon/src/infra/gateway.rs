@@ -93,7 +93,7 @@ mod tests {
     impl BasicGateway {
         pub fn new(addr: &str, proto: &str) -> Result<Self> {
             Ok(Self {
-                address: Address::parse(addr)?,
+                address:  Address::parse(addr)?,
                 protocol: proto.into(),
             })
         }

@@ -41,7 +41,7 @@ pub struct Router {
 }
 
 impl Router {
-    /// Returns a new [`Builder`] with default configuration.
+    /// Returns a new `Builder` with default configuration.
     pub fn builder() -> Builder { Builder::default() }
 
     /// Routes a [`message`](Envelope) to a registered

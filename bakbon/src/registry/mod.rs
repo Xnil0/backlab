@@ -20,12 +20,13 @@ use {
 pub struct Registry(pub(super) ServiceMap);
 
 impl Registry {
-    /// Returns an empty [`Builder`].
+    /// Returns an empty `Builder`.
     pub fn builder() -> Builder { Builder::default() }
 
     /// Adds a new instance for an existing service address.
     ///
-    /// The new instance is created by calling [`Service::duplicate()`] on
+    /// The new instance is created by calling
+    /// [`Service:duplicate()`](crate::Service::duplicate) on
     /// the last registered instance. Returns [`Error::ServiceNotFound`] if
     /// the address is unknown.
     pub fn add_instance(&mut self, address: &str) -> Result<()> {
@@ -51,7 +52,7 @@ impl Registry {
             .map(|s| s.as_ref())
     }
 
-    /// Returns a list of all registered [`Service`]
+    /// Returns a list of all registered [`Service`](crate::Service)
     /// [`Address`](crate::Address)es string representation.
     pub fn list(&self) -> Vec<&str> {
         self.0
@@ -62,7 +63,8 @@ impl Registry {
 }
 
 impl From<ServiceVec> for Registry {
-    /// Builds a `Registry` from a flat list of [`Service`] instances.
+    /// Builds a `Registry` from a flat list of [`Service`](crate::Service)
+    /// instances.
     ///
     /// Instances are grouped by their [`Address`](crate::Address)] string
     /// representation.

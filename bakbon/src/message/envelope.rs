@@ -10,14 +10,14 @@ use {
 };
 
 /// Application-level message wrapper with [`Headers`],
-/// [`Route`] and [`Payload`].
+/// `Route` and [`Payload`].
 ///
 /// An `Envelope` is the core message unit exchanged between components
 /// such as [`Gateway`](crate::Gateway), [`Router`](crate::Router),
 /// [`Queue`](crate::Queue), and [`Service`](crate::Service). It bundles:
 ///
 /// - [`Headers`] for metadata,
-/// - a [`Route`] with source and destination [`Address`]es,
+/// - a `Route` with source and destination [`Address`]es,
 /// - a raw bytes [`Payload`]
 #[derive(Debug)]
 pub struct Envelope {
@@ -45,10 +45,10 @@ impl Envelope {
     ///
     /// ```rust
     /// use bakbon::*;
-    /// 
+    ///
     /// let (src, dst) = (Address::parse("http://source.com"), Address::parse("http://destination.com"));
     /// assert!(src.is_ok() && dst.is_ok());
-    /// 
+    ///
     /// let msg = Envelope::new(src.unwrap(), dst.unwrap(), Payload::default())
     ///     .header("content-type", "application/json")
     ///     .header("encoding", "utf-8");
@@ -65,10 +65,10 @@ impl Envelope {
     ///
     /// ```rust
     /// use bakbon::*;
-    /// 
+    ///
     /// let (src, dst) = (Address::parse("http://source.com"), Address::parse("http://destination.com"));
     /// assert!(src.is_ok() && dst.is_ok());
-    /// 
+    ///
     /// let mut msg = Envelope::new(src.unwrap(), dst.unwrap(), Payload::default());
     /// msg.add_header("content-type", "application/json");
     /// msg.add_header("encoding", "utf-8");

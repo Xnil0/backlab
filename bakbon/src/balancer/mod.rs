@@ -3,13 +3,11 @@
 //! This module provides the `Balancer` struct, which is used internally by
 //! [`Router`](super::Router) to select a [`Service`] instance from a pool
 //! of registered instances for a given logical [`Service`]. It wraps a
-//! [`Strategy`] and uses it to perform instance selection.
+//! `Strategy` and uses it to perform instance selection.
 //!
-//! Note: currently only the [`round_robin`](Strategy::RoundRobin) strategy
-//! has real logic. [`weighted`](Strategy::Weighted),
-//! [`least_connections`](Strategy::LeastConnections), and
-//! [`random`](Strategy::Random) behave as simple fallbacks and are not
-//! production-ready yet.
+//! Note: currently only the `round_robin` strategy
+//! has real logic. `weighted`, `least_connections`, and `random` behave as
+//! simple fallbacks and are not production-ready yet.
 
 mod strategy;
 
@@ -24,7 +22,7 @@ use {
 
 /// Load balancer.
 ///
-/// `Balancer` wraps a [`Strategy`] and selects a [`Service`] instance from
+/// `Balancer` wraps a `Strategy` and selects a [`Service`] instance from
 /// a pool of registred instances for a given logical [`Service`]. It is
 /// only responsible for instance selection; the
 /// [`Registry`](crate::Registry) handles [`Service`] lookup by
@@ -32,7 +30,7 @@ use {
 ///
 /// Used internally by [`Router`](super::Router)
 ///
-/// Note: currently only the [`round_robin`](Strategy::RoundRobin)
+/// Note: currently only the `round_robin`
 /// `Strategy` has real logic. `weighted`, `least_connections`, and
 /// `random` behave as simple fallbacks and are not production-ready yet.
 #[derive(Default)]
@@ -41,7 +39,7 @@ pub struct Balancer(Strategy);
 impl Balancer {
     /// Creates a new balancer from a strategy name.
     ///
-    /// The `strategy` string is converted into a [`Strategy`] struct using
+    /// The `strategy` string is converted into a `Strategy` struct using
     /// its `From<&str>` implementation (e.g. "round_robin", "random")
     pub(super) fn new(strategy: &str) -> Self { Self(strategy.into()) }
 
